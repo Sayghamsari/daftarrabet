@@ -5,6 +5,12 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        'vazir': ['Vazir', 'Tahoma', 'Arial', 'sans-serif'],
+        'sahel': ['Sahel', 'Vazir', 'Tahoma', 'sans-serif'],
+        'shabnam': ['Shabnam', 'Vazir', 'Tahoma', 'sans-serif'],
+        'dana': ['Dana', 'Vazir', 'Tahoma', 'sans-serif'],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

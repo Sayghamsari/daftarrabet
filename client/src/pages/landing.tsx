@@ -36,20 +36,20 @@ export default function Landing() {
                 <GraduationCap className="text-white text-xl w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-primary">پلتفرم مدیریت هوشمند آموزش</h1>
-                <p className="text-sm text-gray-600">سیستم جامع مدرسه‌ای با هوش مصنوعی</p>
+                <h1 className="text-xl font-shabnam font-bold text-primary">تَراز - پلتفرم مدیریت هوشمند آموزش</h1>
+                <p className="text-sm font-dana text-gray-600">سیستم جامع مدرسه‌ای با قدرت هوش مصنوعی</p>
               </div>
             </div>
             <div className="flex items-center space-x-reverse space-x-4">
-              <Button variant="ghost" className="text-gray-600 hover:text-primary">
+              <Button variant="ghost" className="font-sahel text-gray-600 hover:text-primary">
                 درباره ما
               </Button>
-              <Button variant="ghost" className="text-gray-600 hover:text-primary">
+              <Button variant="ghost" className="font-sahel text-gray-600 hover:text-primary">
                 تماس با ما
               </Button>
               <Button 
                 onClick={() => window.location.href = '/api/login'}
-                className="bg-primary text-white hover:bg-primary/90"
+                className="font-sahel bg-primary text-white hover:bg-primary/90"
               >
                 ورود به سیستم
               </Button>
@@ -62,10 +62,10 @@ export default function Landing() {
       <section className="bg-gradient-to-b from-primary/5 to-white py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-primary mb-6 leading-tight">
+            <h2 className="text-4xl md:text-5xl font-shabnam font-bold text-primary mb-6 leading-tight">
               مدیریت هوشمند آموزش با قدرت هوش مصنوعی
             </h2>
-            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+            <p className="text-xl font-dana text-gray-600 mb-8 leading-relaxed">
               پلتفرمی جامع برای مدیریت فرایندهای آموزشی، ارتقاء ارتباطات مدرسه‌ای و پشتیبانی از دانش‌آموزان، معلمان و اولیا با تحلیل‌های هوشمند
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

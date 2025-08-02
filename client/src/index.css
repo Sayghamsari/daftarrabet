@@ -1,9 +1,11 @@
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@master/dist/font-face.css');
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/sahel-font@master/dist/font-face.css');
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/shabnam-font@master/dist/font-face.css');
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/dana-font@master/dist/font-face.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@master/dist/font-face.css');
 
 :root {
   --background: hsl(0, 0%, 100%);
@@ -63,16 +65,49 @@
   }
 
   body {
-    @apply font-vazir antialiased bg-background text-foreground;
+    @apply font-dana antialiased bg-background text-foreground;
     direction: rtl;
+    font-size: 16px;
+    line-height: 1.6;
   }
 
   .font-vazir {
     font-family: 'Vazir', 'Tahoma', 'Arial', sans-serif;
+    font-weight: 400;
   }
 
-  .font-inter {
-    font-family: 'Inter', 'Arial', sans-serif;
+  .font-sahel {
+    font-family: 'Sahel', 'Vazir', 'Tahoma', sans-serif;
+    font-weight: 400;
+  }
+
+  .font-shabnam {
+    font-family: 'Shabnam', 'Vazir', 'Tahoma', sans-serif;
+    font-weight: 400;
+  }
+
+  .font-dana {
+    font-family: 'Dana', 'Vazir', 'Tahoma', sans-serif;
+    font-weight: 400;
+  }
+
+  /* Headings with attractive fonts */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Shabnam', 'Vazir', 'Tahoma', sans-serif;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* Buttons and interactive elements */
+  button, .btn {
+    font-family: 'Sahel', 'Vazir', 'Tahoma', sans-serif;
+    font-weight: 500;
+  }
+
+  /* Cards and content areas */
+  .card, .content {
+    font-family: 'Dana', 'Vazir', 'Tahoma', sans-serif;
+    font-weight: 400;
   }
 }
 
