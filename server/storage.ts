@@ -249,16 +249,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAttendanceByStudent(studentId: string, startDate?: Date, endDate?: Date): Promise<Attendance[]> {
-    let query = db.select().from(attendance).where(eq(attendance.studentId, studentId));
+    let whereConditions = [eq(attendance.studentId, studentId)];
     
     if (startDate && endDate) {
-      query = query.where(and(
+      whereConditions.push(
         gte(attendance.date, startDate.toISOString().split('T')[0]),
         lte(attendance.date, endDate.toISOString().split('T')[0])
-      ));
+      );
     }
     
-    return await query.orderBy(desc(attendance.date));
+    return await db.select().from(attendance)
+      .where(and(...whereConditions))
+      .orderBy(desc(attendance.date));
   }
 
   async getAttendanceByClass(classId: string, date: Date): Promise<Attendance[]> {
@@ -315,29 +317,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getQuestionsBySubject(subject: string, grade?: string): Promise<QuestionBank[]> {
-    let query = db.select().from(questionBank).where(eq(questionBank.subject, subject));
+    let whereConditions = [eq(questionBank.subject, subject)];
     
     if (grade) {
-      query = query.where(eq(questionBank.grade, grade));
+      whereConditions.push(eq(questionBank.grade, grade));
     }
     
-    return await query.orderBy(desc(questionBank.createdAt));
+    return await db.select().from(questionBank)
+      .where(and(...whereConditions))
+      .orderBy(desc(questionBank.createdAt));
   }
 
   async searchQuestions(searchTerm: string, filters?: { subject?: string; grade?: string; difficulty?: string }): Promise<QuestionBank[]> {
-    let query = db.select().from(questionBank).where(like(questionBank.question, `%${searchTerm}%`));
+    let whereConditions = [like(questionBank.question, `%${searchTerm}%`)];
     
     if (filters?.subject) {
-      query = query.where(eq(questionBank.subject, filters.subject));
+      whereConditions.push(eq(questionBank.subject, filters.subject));
     }
     if (filters?.grade) {
-      query = query.where(eq(questionBank.grade, filters.grade));
+      whereConditions.push(eq(questionBank.grade, filters.grade));
     }
     if (filters?.difficulty) {
-      query = query.where(eq(questionBank.difficulty, filters.difficulty));
+      whereConditions.push(eq(questionBank.difficulty, filters.difficulty));
     }
     
-    return await query.orderBy(desc(questionBank.createdAt));
+    return await db.select().from(questionBank)
+      .where(and(...whereConditions))
+      .orderBy(desc(questionBank.createdAt));
   }
   
   // Examination operations
@@ -418,13 +424,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getStudyMaterialsBySubject(subject: string, grade?: string): Promise<StudyMaterial[]> {
-    let query = db.select().from(studyMaterials).where(eq(studyMaterials.subject, subject));
+    let whereConditions = [eq(studyMaterials.subject, subject)];
     
     if (grade) {
-      query = query.where(eq(studyMaterials.grade, grade));
+      whereConditions.push(eq(studyMaterials.grade, grade));
     }
     
-    return await query.orderBy(desc(studyMaterials.createdAt));
+    return await db.select().from(studyMaterials)
+      .where(and(...whereConditions))
+      .orderBy(desc(studyMaterials.createdAt));
   }
 
   async getPublicStudyMaterials(): Promise<StudyMaterial[]> {
@@ -466,18 +474,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAiAnalytics(entityType: string, entityId: string, analysisType?: string): Promise<AiAnalytics[]> {
-    let query = db.select().from(aiAnalytics).where(
-      and(
-        eq(aiAnalytics.entityType, entityType),
-        eq(aiAnalytics.entityId, entityId)
-      )
-    );
+    let whereConditions = [
+      eq(aiAnalytics.entityType, entityType),
+      eq(aiAnalytics.entityId, entityId)
+    ];
     
     if (analysisType) {
-      query = query.where(eq(aiAnalytics.analysisType, analysisType));
+      whereConditions.push(eq(aiAnalytics.analysisType, analysisType));
     }
     
-    return await query.orderBy(desc(aiAnalytics.generatedAt));
+    return await db.select().from(aiAnalytics)
+      .where(and(...whereConditions))
+      .orderBy(desc(aiAnalytics.generatedAt));
   }
 }
 
