@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupCustomAuth, requireAuth } from "./customAuth";
 import { aiService } from "./aiService";
 import {
   insertAssignmentSchema,
@@ -18,26 +18,16 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Custom Auth middleware
+  setupCustomAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Auth routes are now handled in customAuth.ts
 
   // Dashboard routes
-  app.get('/api/dashboard/student/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/dashboard/student/:id', requireAuth, async (req: any, res) => {
     try {
       const studentId = req.params.id;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Ensure user can only access their own dashboard or their child's dashboard
       const user = await storage.getUser(userId);
@@ -72,10 +62,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/dashboard/teacher/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/dashboard/teacher/:id', requireAuth, async (req: any, res) => {
     try {
       const teacherId = req.params.id;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Ensure user is the teacher or has admin access
       if (teacherId !== userId) {
@@ -101,9 +91,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Class management routes
-  app.post('/api/classes', isAuthenticated, async (req: any, res) => {
+  app.post('/api/classes', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'teacher' && user?.role !== 'educational_deputy') {
@@ -120,7 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/classes/teacher/:teacherId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/classes/teacher/:teacherId', requireAuth, async (req: any, res) => {
     try {
       const teacherId = req.params.teacherId;
       const classes = await storage.getClassesByTeacher(teacherId);
@@ -132,9 +122,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Assignment routes
-  app.post('/api/assignments', isAuthenticated, async (req: any, res) => {
+  app.post('/api/assignments', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'teacher') {
@@ -151,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/assignments/class/:classId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/assignments/class/:classId', requireAuth, async (req: any, res) => {
     try {
       const classId = req.params.classId;
       const assignments = await storage.getAssignmentsByClass(classId);
@@ -162,10 +152,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/assignments/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/assignments/:id', requireAuth, async (req: any, res) => {
     try {
       const assignmentId = req.params.id;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       const assignment = await storage.getAssignment(assignmentId);
       if (!assignment || assignment.teacherId !== userId) {
@@ -181,10 +171,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Assignment submission routes
-  app.post('/api/assignments/:id/submit', isAuthenticated, async (req: any, res) => {
+  app.post('/api/assignments/:id/submit', requireAuth, async (req: any, res) => {
     try {
       const assignmentId = req.params.id;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'student') {
@@ -205,10 +195,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/assignments/:id/submissions', isAuthenticated, async (req: any, res) => {
+  app.get('/api/assignments/:id/submissions', requireAuth, async (req: any, res) => {
     try {
       const assignmentId = req.params.id;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       const assignment = await storage.getAssignment(assignmentId);
       if (!assignment || assignment.teacherId !== userId) {
@@ -223,10 +213,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/submissions/:id/grade', isAuthenticated, async (req: any, res) => {
+  app.put('/api/submissions/:id/grade', requireAuth, async (req: any, res) => {
     try {
       const submissionId = req.params.id;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'teacher') {
@@ -247,9 +237,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Attendance routes
-  app.post('/api/attendance', isAuthenticated, async (req: any, res) => {
+  app.post('/api/attendance', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'teacher') {
@@ -272,7 +262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/attendance/student/:studentId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/attendance/student/:studentId', requireAuth, async (req: any, res) => {
     try {
       const studentId = req.params.studentId;
       const { startDate, endDate } = req.query;
@@ -288,7 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/attendance/class/:classId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/attendance/class/:classId', requireAuth, async (req: any, res) => {
     try {
       const classId = req.params.classId;
       const { date } = req.query;
@@ -306,9 +296,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Online classroom routes
-  app.post('/api/online-classrooms', isAuthenticated, async (req: any, res) => {
+  app.post('/api/online-classrooms', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'teacher') {
@@ -325,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/online-classrooms/class/:classId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/online-classrooms/class/:classId', requireAuth, async (req: any, res) => {
     try {
       const classId = req.params.classId;
       const classrooms = await storage.getOnlineClassroomsByClass(classId);
@@ -337,9 +327,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Question bank routes
-  app.post('/api/questions', isAuthenticated, async (req: any, res) => {
+  app.post('/api/questions', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'teacher' && user?.role !== 'educational_deputy') {
@@ -359,7 +349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/questions/search', isAuthenticated, async (req: any, res) => {
+  app.get('/api/questions/search', requireAuth, async (req: any, res) => {
     try {
       const { q, subject, grade, difficulty } = req.query;
       
@@ -380,7 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/questions/subject/:subject', isAuthenticated, async (req: any, res) => {
+  app.get('/api/questions/subject/:subject', requireAuth, async (req: any, res) => {
     try {
       const subject = req.params.subject;
       const { grade } = req.query;
@@ -394,9 +384,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Examination routes
-  app.post('/api/examinations', isAuthenticated, async (req: any, res) => {
+  app.post('/api/examinations', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'teacher') {
@@ -413,7 +403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/examinations/class/:classId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/examinations/class/:classId', requireAuth, async (req: any, res) => {
     try {
       const classId = req.params.classId;
       const examinations = await storage.getExaminationsByClass(classId);
@@ -425,7 +415,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Analytics routes
-  app.get('/api/analytics/:entityType/:entityId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/analytics/:entityType/:entityId', requireAuth, async (req: any, res) => {
     try {
       const { entityType, entityId } = req.params;
       const { analysisType } = req.query;
@@ -438,9 +428,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/analytics/generate', isAuthenticated, async (req: any, res) => {
+  app.post('/api/analytics/generate', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'teacher' && user?.role !== 'educational_deputy' && user?.role !== 'counselor') {
@@ -468,9 +458,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Counseling session routes
-  app.post('/api/counseling-sessions', isAuthenticated, async (req: any, res) => {
+  app.post('/api/counseling-sessions', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'counselor') {
@@ -487,7 +477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/counseling-sessions/counselor/:counselorId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/counseling-sessions/counselor/:counselorId', requireAuth, async (req: any, res) => {
     try {
       const counselorId = req.params.counselorId;
       const sessions = await storage.getCounselingSessionsByCounselor(counselorId);
@@ -498,7 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/counseling-sessions/student/:studentId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/counseling-sessions/student/:studentId', requireAuth, async (req: any, res) => {
     try {
       const studentId = req.params.studentId;
       const sessions = await storage.getCounselingSessionsByStudent(studentId);
@@ -510,9 +500,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Study materials routes
-  app.post('/api/study-materials', isAuthenticated, async (req: any, res) => {
+  app.post('/api/study-materials', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'teacher' && user?.role !== 'educational_deputy') {
@@ -532,7 +522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/study-materials/subject/:subject', isAuthenticated, async (req: any, res) => {
+  app.get('/api/study-materials/subject/:subject', requireAuth, async (req: any, res) => {
     try {
       const subject = req.params.subject;
       const { grade } = req.query;
@@ -545,7 +535,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/study-materials/public', isAuthenticated, async (req: any, res) => {
+  app.get('/api/study-materials/public', requireAuth, async (req: any, res) => {
     try {
       const materials = await storage.getPublicStudyMaterials();
       res.json(materials);

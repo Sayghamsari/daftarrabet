@@ -15,7 +15,7 @@ import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table (required for Replit Auth)
+// Session storage table
 export const sessions = pgTable(
   "sessions",
   {
@@ -26,21 +26,35 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table (required for Replit Auth)
+// User storage table for Persian educational system
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
+  nationalId: varchar("national_id", { length: 10 }).unique().notNull(), // کد ملی
+  phoneNumber: varchar("phone_number", { length: 11 }).unique().notNull(), // شماره تلفن
+  password: varchar("password").notNull(), // رمز عبور (هش شده)
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
+  email: varchar("email"),
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role").notNull().default("student"), // student, teacher, counselor, educational_deputy, liaison_office, parent
   schoolId: varchar("school_id"),
   parentId: varchar("parent_id"), // for students to link to parent
+  isVerified: boolean("is_verified").default(false), // تایید شماره تلفن
   isTrialActive: boolean("is_trial_active").default(true),
   trialStartDate: timestamp("trial_start_date").defaultNow(),
   trialEndDate: timestamp("trial_end_date").default(sql`NOW() + INTERVAL '14 days'`),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// SMS verification codes table
+export const smsVerifications = pgTable("sms_verifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  phoneNumber: varchar("phone_number", { length: 11 }).notNull(),
+  code: varchar("code", { length: 6 }).notNull(),
+  isUsed: boolean("is_used").default(false),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const schools = pgTable("schools", {
@@ -347,6 +361,11 @@ export const insertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
+export const insertSmsVerificationSchema = createInsertSchema(smsVerifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertSchoolSchema = createInsertSchema(schools).omit({
   id: true,
   createdAt: true,
@@ -419,6 +438,39 @@ export const insertAiAnalyticsSchema = createInsertSchema(aiAnalytics).omit({
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// SMS verification types
+export type SmsVerification = typeof smsVerifications.$inferSelect;
+export type InsertSmsVerification = typeof smsVerifications.$inferInsert;
+
+// Auth schemas
+export const loginSchema = z.object({
+  nationalId: z.string().length(10, "کد ملی باید 10 رقم باشد"),
+  password: z.string().length(4, "رمز عبور باید 4 رقم باشد"),
+});
+
+export const registerSchema = z.object({
+  phoneNumber: z.string().length(11, "شماره تلفن باید 11 رقم باشد"),
+});
+
+export const verifyPhoneSchema = z.object({
+  phoneNumber: z.string().length(11, "شماره تلفن باید 11 رقم باشد"),
+  code: z.string().length(6, "کد تایید باید 6 رقم باشد"),
+});
+
+export const completeProfileSchema = z.object({
+  nationalId: z.string().length(10, "کد ملی باید 10 رقم باشد"),
+  firstName: z.string().min(1, "نام الزامی است"),
+  lastName: z.string().min(1, "نام خانوادگی الزامی است"),
+  email: z.string().email("ایمیل معتبر وارد کنید").optional(),
+  role: z.enum(["student", "teacher", "counselor", "educational_deputy", "liaison_office", "parent"]),
+  schoolId: z.string().optional(),
+});
+
+export type LoginData = z.infer<typeof loginSchema>;
+export type RegisterData = z.infer<typeof registerSchema>;
+export type VerifyPhoneData = z.infer<typeof verifyPhoneSchema>;
+export type CompleteProfileData = z.infer<typeof completeProfileSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type School = typeof schools.$inferSelect;
 export type InsertSchool = z.infer<typeof insertSchoolSchema>;

@@ -1,5 +1,6 @@
 import {
   users,
+  smsVerifications,
   schools,
   classes,
   assignments,
@@ -15,6 +16,9 @@ import {
   aiAnalytics,
   type User,
   type UpsertUser,
+  type InsertUser,
+  type SmsVerification,
+  type InsertSmsVerification,
   type School,
   type InsertSchool,
   type Class,
@@ -47,9 +51,17 @@ import { eq, and, desc, asc, gte, lte, like, inArray } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
-  // User operations (mandatory for Replit Auth)
+  // User operations
   getUser(id: string): Promise<User | undefined>;
+  getUserByNationalId(nationalId: string): Promise<User | undefined>;
+  getUserByPhoneNumber(phoneNumber: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
+  
+  // SMS verification operations
+  createSmsVerification(verification: InsertSmsVerification): Promise<SmsVerification>;
+  getValidSmsVerification(phoneNumber: string, code: string): Promise<SmsVerification | undefined>;
+  markSmsVerificationAsUsed(id: string): Promise<void>;
   
   // School operations
   createSchool(school: InsertSchool): Promise<School>;
@@ -131,9 +143,24 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // User operations (mandatory for Replit Auth)
+  // User operations
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByNationalId(nationalId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.nationalId, nationalId));
+    return user;
+  }
+
+  async getUserByPhoneNumber(phoneNumber: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.phoneNumber, phoneNumber));
+    return user;
+  }
+
+  async createUser(userData: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(userData).returning();
     return user;
   }
 
@@ -150,6 +177,29 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  // SMS verification operations
+  async createSmsVerification(verificationData: InsertSmsVerification): Promise<SmsVerification> {
+    const [verification] = await db.insert(smsVerifications).values(verificationData).returning();
+    return verification;
+  }
+
+  async getValidSmsVerification(phoneNumber: string, code: string): Promise<SmsVerification | undefined> {
+    const [verification] = await db.select().from(smsVerifications)
+      .where(and(
+        eq(smsVerifications.phoneNumber, phoneNumber),
+        eq(smsVerifications.code, code),
+        eq(smsVerifications.isUsed, false),
+        gte(smsVerifications.expiresAt, new Date())
+      ));
+    return verification;
+  }
+
+  async markSmsVerificationAsUsed(id: string): Promise<void> {
+    await db.update(smsVerifications)
+      .set({ isUsed: true })
+      .where(eq(smsVerifications.id, id));
   }
   
   // School operations

@@ -3,12 +3,13 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, AuthProvider } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import Home from "@/pages/home";
+import AuthPage from "@/pages/auth";
 import StudentDashboard from "@/pages/dashboard/student";
 import TeacherDashboard from "@/pages/dashboard/teacher";
 import CounselorDashboard from "@/pages/dashboard/counselor";
@@ -38,6 +39,7 @@ function Router() {
       {!isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
+          <Route path="/auth" component={AuthPage} />
           <Route path="/about" component={About} />
           <Route path="/contact" component={Contact} />
         </>
@@ -66,10 +68,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="font-vazir" dir="rtl">
-          <Toaster />
-          <Router />
-        </div>
+        <AuthProvider>
+          <div className="font-vazir" dir="rtl">
+            <Toaster />
+            <Router />
+          </div>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

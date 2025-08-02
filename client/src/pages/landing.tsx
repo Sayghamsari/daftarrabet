@@ -48,7 +48,7 @@ export default function Landing() {
                 تماس با ما
               </Button>
               <Button 
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => window.location.href = '/auth'}
                 className="font-sahel bg-primary text-white hover:bg-primary/90"
               >
                 ورود به سیستم
@@ -71,7 +71,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 
                 size="lg"
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => window.location.href = '/auth'}
                 className="bg-secondary text-white hover:bg-secondary/90 px-8 py-4 text-lg"
               >
                 <Rocket className="ml-2 w-5 h-5" />
@@ -516,7 +516,7 @@ export default function Landing() {
                     <div className="flex flex-col sm:flex-row gap-4">
                       <Button 
                         size="lg"
-                        onClick={() => window.location.href = '/api/login'}
+                        onClick={() => window.location.href = '/auth'}
                         className="bg-secondary text-white hover:bg-secondary/90 flex-1"
                       >
                         شروع آزمایشی رایگان
