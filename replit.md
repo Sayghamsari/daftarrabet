@@ -1,6 +1,6 @@
 # Overview
 
-This is a comprehensive educational management platform designed as an enhanced version of "کارسنج" (Karsanj), featuring AI-powered analytics and support for multiple user roles. The platform serves as a digital ecosystem for managing educational processes, improving school communications, and providing comprehensive support for students, teachers, counselors, educational deputies, and liaison offices.
+This is a comprehensive educational management platform called "دفتر رابط" (Daftar Rabet), designed as an enhanced version of "کارسنج" (Karsanj), featuring AI-powered analytics and support for multiple user roles. The platform serves as a digital ecosystem for managing educational processes, improving school communications, and providing comprehensive support for students, teachers, counselors, educational deputies, and liaison offices.
 
 The system includes features for assignment management, attendance tracking, online classrooms, question banks, examinations, study materials, counseling sessions, and AI-driven insights. It supports Persian (Farsi) language and is built with modern web technologies for both frontend and backend operations.
 

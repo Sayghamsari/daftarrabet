@@ -36,7 +36,7 @@ export default function Landing() {
                 <GraduationCap className="text-white text-xl w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-xl font-shabnam font-bold text-primary">تَراز - پلتفرم مدیریت هوشمند آموزش</h1>
+                <h1 className="text-xl font-shabnam font-bold text-primary">دفتر رابط - پلتفرم مدیریت هوشمند آموزش</h1>
                 <p className="text-sm font-dana text-gray-600">سیستم جامع مدرسه‌ای با قدرت هوش مصنوعی</p>
               </div>
             </div>

@@ -48,8 +48,8 @@ export default function Navbar() {
               <GraduationCap className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-primary">تراز</h1>
-              <p className="text-xs text-gray-600">پلتفرم مدیریت هوشمند آموزش</p>
+              <h1 className="text-lg font-shabnam font-bold text-primary">دفتر رابط</h1>
+              <p className="text-xs font-dana text-gray-600">پلتفرم مدیریت هوشمند آموزش</p>
             </div>
           </div>
         </div>
