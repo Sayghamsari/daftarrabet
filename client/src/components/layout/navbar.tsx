@@ -68,9 +68,9 @@ export default function Navbar() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "کاربر"} />
+                  <AvatarImage src={(user as any)?.profileImageUrl} alt={(user as any)?.firstName || "کاربر"} />
                   <AvatarFallback>
-                    {user?.firstName?.[0] || user?.email?.[0] || "ک"}
+                    {(user as any)?.firstName?.[0] || (user as any)?.email?.[0] || "ک"}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -79,13 +79,13 @@ export default function Navbar() {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
-                    {user?.firstName} {user?.lastName}
+                    {(user as any)?.firstName} {(user as any)?.lastName}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
+                    {(user as any)?.email}
                   </p>
-                  <Badge className={`text-xs mt-1 ${getRoleColor(user?.role || "")}`}>
-                    {getRoleLabel(user?.role || "")}
+                  <Badge className={`text-xs mt-1 ${getRoleColor((user as any)?.role || "")}`}>
+                    {getRoleLabel((user as any)?.role || "")}
                   </Badge>
                 </div>
               </DropdownMenuLabel>

@@ -1,298 +1,336 @@
-import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "wouter";
-import Navbar from "@/components/layout/navbar";
-import Sidebar from "@/components/layout/sidebar";
-import AnalyticsDashboard from "@/components/ai/analytics-dashboard";
-import PerformanceChart from "@/components/ai/performance-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import EmptyState from "@/components/common/empty-state";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BookOpen, 
   Calendar, 
+  CheckCircle, 
+  Clock, 
+  FileText, 
   GraduationCap, 
   TrendingUp,
-  Clock,
-  CheckCircle,
-  AlertCircle
+  Video,
+  User,
+  MessageSquare,
+  BarChart3,
+  AlertCircle,
+  Award,
+  Target
 } from "lucide-react";
+import Navbar from "@/components/layout/navbar";
 
 export default function StudentDashboard() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  const { toast } = useToast();
-  const params = useParams();
-  
-  // Get student ID from params or use current user ID
-  const studentId = params.id || user?.id;
-
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        title: "غیر مجاز",
-        description: "شما از سیستم خارج شده‌اید. در حال ورود مجدد...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, authLoading, toast]);
-
-  const { data: dashboardData, isLoading } = useQuery({
-    queryKey: ["/api/dashboard/student", studentId],
-    enabled: !!studentId && isAuthenticated,
-    retry: false,
-  });
-
-  if (authLoading || isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1 p-6">
-            <div className="flex items-center justify-center h-64">
-              <LoadingSpinner />
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  const assignments = dashboardData?.assignments || [];
-  const attendance = dashboardData?.attendance || [];
-  const analytics = dashboardData?.analytics || [];
-
-  // Calculate stats
-  const completedAssignments = assignments.filter(a => a.isGraded).length;
-  const pendingAssignments = assignments.filter(a => !a.isGraded).length;
-  const averageScore = assignments.length > 0 
-    ? assignments.filter(a => a.score).reduce((sum, a) => sum + parseFloat(a.score), 0) / assignments.filter(a => a.score).length
-    : 0;
-
-  const attendanceRate = attendance.length > 0
-    ? (attendance.filter(a => a.status === 'present' || a.status === 'late').length / attendance.length) * 100
-    : 0;
-
-  // Sample chart data
-  const performanceData = [
-    { name: 'هفته 1', value: 85 },
-    { name: 'هفته 2', value: 90 },
-    { name: 'هفته 3', value: 78 },
-    { name: 'هفته 4', value: 92 },
-    { name: 'هفته 5', value: 88 }
+  // Mock data - replace with real API calls
+  const assignments = [
+    { id: 1, title: "تمرین ریاضی فصل ۳", subject: "ریاضی", dueDate: "۱۴۰۳/۰۸/۱۵", status: "pending" },
+    { id: 2, title: "انشا فارسی", subject: "فارسی", dueDate: "۱۴۰۳/۰۸/۲۰", status: "submitted" },
+    { id: 3, title: "آزمایش فیزیک", subject: "فیزیک", dueDate: "۱۴۰۳/۰۸/۲۵", status: "pending" }
   ];
 
-  const subjectData = [
-    { name: 'ریاضی', value: 92 },
-    { name: 'فیزیک', value: 85 },
-    { name: 'شیمی', value: 88 },
-    { name: 'زبان', value: 95 }
+  const upcomingClasses = [
+    { id: 1, subject: "ریاضی", teacher: "آقای احمدی", time: "۰۸:۰۰", room: "کلاس ۱۰۱" },
+    { id: 2, subject: "فیزیک", teacher: "خانم رضایی", time: "۰۹:۳۰", room: "آزمایشگاه" },
+    { id: 3, subject: "فارسی", teacher: "آقای محمدی", time: "۱۱:۰۰", room: "کلاس ۲۰۳" }
+  ];
+
+  const grades = [
+    { subject: "ریاضی", grade: 18.5, total: 20 },
+    { subject: "فیزیک", grade: 17, total: 20 },
+    { subject: "فارسی", grade: 19, total: 20 },
+    { subject: "شیمی", grade: 16.5, total: 20 }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">داشبورد دانش‌آموز</h1>
-                <p className="text-gray-600 mt-1">نمای کلی از عملکرد تحصیلی شما</p>
-              </div>
-              <Badge className="bg-blue-100 text-blue-800">
-                <GraduationCap className="w-4 h-4 ml-1" />
-                دانش‌آموز
-              </Badge>
-            </div>
+      
+      <div className="container mx-auto px-4 py-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-shabnam font-bold text-gray-900 mb-2">پنل دانش‌آموز</h1>
+          <p className="font-dana text-gray-600">خوش آمدید! از اینجا می‌توانید تکالیف، نمرات و برنامه کلاسی خود را مشاهده کنید.</p>
+        </div>
 
-            {/* Stats Overview */}
-            <div className="grid md:grid-cols-4 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">میانگین نمرات</p>
-                      <p className="text-2xl font-bold text-blue-600">
-                        {averageScore.toFixed(1)}
+        <div className="grid lg:grid-cols-3 gap-6 mb-8">
+          {/* Quick Stats */}
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-sahel font-medium text-blue-800">تکالیف معوق</CardTitle>
+              <AlertCircle className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-900">۲</div>
+              <p className="text-xs text-blue-600 font-dana">نیاز به انجام دارد</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-sahel font-medium text-green-800">میانگین نمرات</CardTitle>
+              <TrendingUp className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-900">۱۷.۷۵</div>
+              <p className="text-xs text-green-600 font-dana">از ۲۰</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-sahel font-medium text-purple-800">حضور</CardTitle>
+              <Award className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-900">۹۵٪</div>
+              <p className="text-xs text-purple-600 font-dana">در این ماه</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="assignments" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="assignments" className="font-sahel">تکالیف</TabsTrigger>
+            <TabsTrigger value="schedule" className="font-sahel">برنامه کلاسی</TabsTrigger>
+            <TabsTrigger value="grades" className="font-sahel">نمرات</TabsTrigger>
+            <TabsTrigger value="attendance" className="font-sahel">حضور و غیاب</TabsTrigger>
+            <TabsTrigger value="profile" className="font-sahel">پروفایل</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="assignments">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-shabnam text-xl flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  تکالیف من
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {assignments.map((assignment) => (
+                    <div key={assignment.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-primary/10 p-2 rounded-lg">
+                          <BookOpen className="w-4 h-4 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-sahel font-bold text-gray-800">{assignment.title}</h4>
+                          <p className="font-dana text-sm text-gray-600">{assignment.subject}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge variant={assignment.status === 'submitted' ? 'default' : 'destructive'}>
+                          {assignment.status === 'submitted' ? 'تحویل داده شده' : 'در انتظار'}
+                        </Badge>
+                        <div className="text-left">
+                          <p className="font-dana text-sm text-gray-600">مهلت تحویل</p>
+                          <p className="font-dana text-sm font-bold">{assignment.dueDate}</p>
+                        </div>
+                        <Button size="sm" variant="outline" className="font-sahel">
+                          مشاهده
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="schedule">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-shabnam text-xl flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  برنامه کلاسی امروز
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {upcomingClasses.map((class_item) => (
+                    <div key={class_item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-secondary/10 p-2 rounded-lg">
+                          <GraduationCap className="w-4 h-4 text-secondary" />
+                        </div>
+                        <div>
+                          <h4 className="font-sahel font-bold text-gray-800">{class_item.subject}</h4>
+                          <p className="font-dana text-sm text-gray-600">{class_item.teacher}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-center">
+                          <p className="font-dana text-sm text-gray-600">زمان</p>
+                          <p className="font-dana font-bold">{class_item.time}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="font-dana text-sm text-gray-600">مکان</p>
+                          <p className="font-dana font-bold">{class_item.room}</p>
+                        </div>
+                        <Button size="sm" variant="outline" className="font-sahel">
+                          <Video className="w-4 h-4 ml-2" />
+                          ورود به کلاس
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="grades">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-shabnam text-xl flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  نمرات و عملکرد
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {grades.map((grade, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-sahel font-bold text-gray-800">{grade.subject}</span>
+                        <span className="font-dana text-lg font-bold text-primary">
+                          {grade.grade} از {grade.total}
+                        </span>
+                      </div>
+                      <Progress value={(grade.grade / grade.total) * 100} className="h-2" />
+                      <p className="font-dana text-sm text-gray-600">
+                        درصد: {Math.round((grade.grade / grade.total) * 100)}%
                       </p>
                     </div>
-                    <TrendingUp className="w-8 h-8 text-blue-500" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="attendance">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-shabnam text-xl flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5" />
+                  گزارش حضور و غیاب
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-sahel font-bold text-lg">آمار کلی</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="font-dana">کل حضورها:</span>
+                        <span className="font-bold">۲۸ روز</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-dana">غیبت‌ها:</span>
+                        <span className="font-bold text-red-600">۲ روز</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-dana">تأخیرها:</span>
+                        <span className="font-bold text-yellow-600">۱ روز</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-dana">درصد حضور:</span>
+                        <span className="font-bold text-green-600">۹۵٪</span>
+                      </div>
+                    </div>
                   </div>
-                  <Progress value={averageScore} className="mt-2" />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">درصد حضور</p>
-                      <p className="text-2xl font-bold text-green-600">
-                        {attendanceRate.toFixed(0)}%
-                      </p>
-                    </div>
-                    <Calendar className="w-8 h-8 text-green-500" />
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-sahel font-bold text-lg mb-3">پیام مشاور</h4>
+                    <p className="font-dana text-gray-600">
+                      عملکرد حضور شما عالی است! ادامه دهید.
+                    </p>
                   </div>
-                  <Progress value={attendanceRate} className="mt-2" />
-                </CardContent>
-              </Card>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">تکالیف تکمیل شده</p>
-                      <p className="text-2xl font-bold text-purple-600">{completedAssignments}</p>
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-shabnam text-xl flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  پروفایل من
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-sahel font-bold text-lg">اطلاعات شخصی</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="font-dana text-gray-600">نام و نام خانوادگی:</span>
+                        <span className="font-bold">علی احمدی</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-dana text-gray-600">کد دانش‌آموزی:</span>
+                        <span className="font-bold">۱۲۳۴۵۶</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-dana text-gray-600">پایه:</span>
+                        <span className="font-bold">دوازدهم</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-dana text-gray-600">رشته:</span>
+                        <span className="font-bold">ریاضی فیزیک</span>
+                      </div>
                     </div>
-                    <CheckCircle className="w-8 h-8 text-purple-500" />
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">تکالیف در انتظار</p>
-                      <p className="text-2xl font-bold text-orange-600">{pendingAssignments}</p>
+                  <div className="space-y-4">
+                    <h4 className="font-sahel font-bold text-lg">اطلاعات تماس</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="font-dana text-gray-600">شماره تماس:</span>
+                        <span className="font-bold">۰۹۱۲۳۴۵۶۷۸۹</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-dana text-gray-600">ایمیل:</span>
+                        <span className="font-bold">ali.ahmadi@school.edu</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-dana text-gray-600">آدرس:</span>
+                        <span className="font-bold">تهران، منطقه ۱</span>
+                      </div>
                     </div>
-                    <Clock className="w-8 h-8 text-orange-500" />
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+                <div className="mt-6 pt-4 border-t">
+                  <Button className="font-sahel">
+                    ویرایش اطلاعات
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-            {/* Charts */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              <PerformanceChart 
-                data={performanceData}
-                type="line"
-                title="روند عملکرد هفتگی"
-              />
-              <PerformanceChart 
-                data={subjectData}
-                type="bar"
-                title="نمرات به تفکیک درس"
-              />
-            </div>
-
-            {/* Recent Activities and AI Analytics */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Recent Assignments */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5" />
-                    آخرین تکالیف
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {assignments.length > 0 ? (
-                    <div className="space-y-4">
-                      {assignments.slice(0, 5).map((assignment) => (
-                        <div key={assignment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-900">
-                              {assignment.assignment?.title || 'بدون عنوان'}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {assignment.submittedAt 
-                                ? `ارسال شده در ${new Date(assignment.submittedAt).toLocaleDateString('fa-IR')}`
-                                : 'ارسال نشده'
-                              }
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {assignment.isGraded ? (
-                              <Badge className="bg-green-100 text-green-800">
-                                {assignment.score}/20
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline">
-                                در انتظار نمره
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <EmptyState
-                      title="تکلیفی وجود ندارد"
-                      description="هنوز تکلیفی ارسال نکرده‌اید"
-                      icon={<BookOpen className="w-12 h-12" />}
-                    />
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Attendance Overview */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5" />
-                    وضعیت حضور اخیر
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {attendance.length > 0 ? (
-                    <div className="space-y-4">
-                      {attendance.slice(0, 5).map((record) => (
-                        <div key={record.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {new Date(record.date).toLocaleDateString('fa-IR')}
-                            </p>
-                            {record.notes && (
-                              <p className="text-sm text-gray-500">{record.notes}</p>
-                            )}
-                          </div>
-                          <Badge className={
-                            record.status === 'present' ? 'bg-green-100 text-green-800' :
-                            record.status === 'late' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }>
-                            {record.status === 'present' ? 'حاضر' :
-                             record.status === 'late' ? 'تأخیر' : 'غایب'}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <EmptyState
-                      title="رکورد حضوری وجود ندارد"
-                      description="هنوز حضور و غیابی ثبت نشده است"
-                      icon={<Calendar className="w-12 h-12" />}
-                    />
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* AI Analytics */}
-            {studentId && (
-              <AnalyticsDashboard 
-                entityType="student"
-                entityId={studentId}
-              />
-            )}
+        {/* Quick Actions */}
+        <div className="mt-8">
+          <h2 className="text-xl font-shabnam font-bold mb-4">دسترسی سریع</h2>
+          <div className="grid md:grid-cols-4 gap-4">
+            <Button variant="outline" className="h-20 flex flex-col gap-2 font-sahel">
+              <MessageSquare className="w-6 h-6" />
+              پیام به معلم
+            </Button>
+            <Button variant="outline" className="h-20 flex flex-col gap-2 font-sahel">
+              <Calendar className="w-6 h-6" />
+              برنامه هفتگی
+            </Button>
+            <Button variant="outline" className="h-20 flex flex-col gap-2 font-sahel">
+              <Target className="w-6 h-6" />
+              اهداف تحصیلی
+            </Button>
+            <Button variant="outline" className="h-20 flex flex-col gap-2 font-sahel">
+              <Clock className="w-6 h-6" />
+              برنامه‌ریزی روزانه
+            </Button>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,14 @@ This is a comprehensive educational management platform called "دفتر راب�
 
 The system includes features for assignment management, attendance tracking, online classrooms, question banks, examinations, study materials, counseling sessions, and AI-driven insights. It supports Persian (Farsi) language and is built with modern web technologies for both frontend and backend operations.
 
+## Recent Changes
+- Project name officially changed from "Taraz" to "دفتر رابط" across all platform components
+- Enhanced Persian typography system with Dana, Shabnam, Sahel, and Vazir fonts
+- Created comprehensive About Us and Contact pages with full Persian content
+- Added public routing for landing, about, and contact pages (accessible without login)
+- Fixed HTML language settings to Persian (fa) with RTL direction
+- Implemented proper navigation between public pages
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
