@@ -1,225 +1,181 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import EmptyState from "@/components/common/empty-state";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertQuestionBankSchema } from "@shared/schema";
-import { z } from "zod";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { 
-  HelpCircle, 
   Plus, 
-  Search,
+  Search, 
   Filter,
   Edit,
   Trash2,
+  Copy,
+  Eye,
+  Star,
   BookOpen,
-  GraduationCap,
-  Target,
   CheckCircle,
-  X,
-  Tag
+  HelpCircle,
+  Target
 } from "lucide-react";
-
-const questionFormSchema = insertQuestionBankSchema.extend({
-  options: z.array(z.string()).optional(),
-});
-
-type QuestionFormData = z.infer<typeof questionFormSchema>;
+import LoadingSpinner from "@/components/common/loading-spinner";
 
 export default function QuestionBank() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState("");
-  const [selectedGrade, setSelectedGrade] = useState("");
-  const [selectedDifficulty, setSelectedDifficulty] = useState("");
-  const [editingQuestion, setEditingQuestion] = useState<any>(null);
-
-  const form = useForm<QuestionFormData>({
-    resolver: zodResolver(questionFormSchema),
-    defaultValues: {
-      question: "",
-      questionType: "multiple_choice",
-      options: ["", "", "", ""],
-      correctAnswer: "",
-      subject: "",
-      grade: "",
-      difficulty: "medium",
-      tags: [],
-    },
+  const [selectedSubject, setSelectedSubject] = useState("all");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("all");
+  const [newQuestion, setNewQuestion] = useState({
+    title: "",
+    content: "",
+    type: "multiple_choice",
+    subject: "",
+    difficulty: "medium",
+    options: ["", "", "", ""],
+    correctAnswer: 0,
+    explanation: ""
   });
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       toast({
         title: "غیر مجاز",
         description: "شما از سیستم خارج شده‌اید. در حال ورود مجدد...",
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/auth";
       }, 500);
       return;
     }
-  }, [isAuthenticated, authLoading, toast]);
+  }, [isAuthenticated, isLoading, toast]);
 
-  // Search questions
-  const { data: questions, isLoading } = useQuery({
-    queryKey: ["/api/questions/search", searchTerm, selectedSubject, selectedGrade, selectedDifficulty],
-    queryFn: () => {
-      if (!searchTerm) return [];
-      const params = new URLSearchParams({
-        q: searchTerm,
-        ...(selectedSubject && { subject: selectedSubject }),
-        ...(selectedGrade && { grade: selectedGrade }),
-        ...(selectedDifficulty && { difficulty: selectedDifficulty }),
-      });
-      return fetch(`/api/questions/search?${params}`).then(res => res.json());
+  // Mock data - در آینده از API واقعی دریافت خواهد شد
+  const mockQuestions = [
+    {
+      id: 1,
+      title: "محاسبه مساحت دایره",
+      content: "فرمول محاسبه مساحت دایره با شعاع r چیست؟",
+      type: "multiple_choice",
+      subject: "ریاضی",
+      difficulty: "easy",
+      options: ["πr²", "2πr", "πr", "r²"],
+      correctAnswer: 0,
+      explanation: "مساحت دایره برابر با π ضرب در مجذور شعاع است.",
+      createdBy: "فاطمه کریمی",
+      createdAt: "2024-08-01",
+      isPublic: true,
+      usageCount: 25
     },
-    enabled: !!searchTerm && isAuthenticated,
-    retry: false,
-  });
-
-  // Get questions by subject
-  const { data: subjectQuestions } = useQuery({
-    queryKey: ["/api/questions/subject", selectedSubject, selectedGrade],
-    enabled: !!selectedSubject && !searchTerm && isAuthenticated,
-    retry: false,
-  });
-
-  const createQuestionMutation = useMutation({
-    mutationFn: async (questionData: QuestionFormData) => {
-      await apiRequest("POST", "/api/questions", questionData);
+    {
+      id: 2,
+      title: "قانون نیوتن اول",
+      content: "قانون اول نیوتن در مورد چه موضوعی بیان می‌کند؟",
+      type: "multiple_choice",
+      subject: "فیزیک",
+      difficulty: "medium",
+      options: ["اینرسی", "نیرو", "حرکت", "جرم"],
+      correctAnswer: 0,
+      explanation: "قانون اول نیوتن در مورد اینرسی (لختی) اجسام بیان می‌کند.",
+      createdBy: "محمد رضایی",
+      createdAt: "2024-08-02",
+      isPublic: true,
+      usageCount: 18
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/questions"] });
-      setShowCreateForm(false);
-      form.reset();
-      toast({
-        title: "موفق",
-        description: "سؤال با موفقیت ایجاد شد",
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "غیر مجاز",
-          description: "شما از سیستم خارج شده‌اید. در حال ورود مجدد...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "خطا",
-        description: "خطا در ایجاد سؤال",
-        variant: "destructive",
-      });
+    {
+      id: 3,
+      title: "تعریف اتم",
+      content: "کوچکترین واحد تشکیل‌دهنده ماده که خواص شیمیایی عنصر را حفظ می‌کند چیست؟",
+      type: "short_answer",
+      subject: "شیمی",
+      difficulty: "easy",
+      correctAnswer: "اتم",
+      explanation: "اتم کوچکترین واحد ماده است که خواص شیمیایی عنصر را نشان می‌دهد.",
+      createdBy: "علی محمدی",
+      createdAt: "2024-08-03",
+      isPublic: false,
+      usageCount: 12
     }
-  });
+  ];
 
-  if (authLoading) {
+  const subjects = ["ریاضی", "فیزیک", "شیمی", "زیست‌شناسی", "ادبیات", "تاریخ"];
+  const difficulties = ["easy", "medium", "hard"];
+
+  if (isLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1 p-6">
-            <div className="flex items-center justify-center h-64">
-              <LoadingSpinner />
-            </div>
-          </main>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  const displayedQuestions = searchTerm && questions ? questions : subjectQuestions || [];
-
-  const subjects = ["ریاضی", "فیزیک", "شیمی", "زیست‌شناسی", "زبان انگلیسی", "ادبیات فارسی", "تاریخ", "جغرافیا"];
-  const grades = ["هفتم", "هشتم", "نهم", "دهم", "یازدهم", "دوازدهم"];
-  const difficulties = [
-    { value: "easy", label: "آسان" },
-    { value: "medium", label: "متوسط" },
-    { value: "hard", label: "سخت" }
-  ];
-
-  const questionTypes = [
-    { value: "multiple_choice", label: "چند گزینه‌ای" },
-    { value: "essay", label: "تشریحی" },
-    { value: "fill_blank", label: "جای خالی" },
-    { value: "true_false", label: "درست/غلط" }
-  ];
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'easy':
-        return 'bg-green-100 text-green-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'hard':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getDifficultyLabel = (difficulty: string) => {
-    return difficulties.find(d => d.value === difficulty)?.label || difficulty;
-  };
-
-  const getQuestionTypeLabel = (type: string) => {
-    return questionTypes.find(t => t.value === type)?.label || type;
-  };
-
-  const onSubmit = (data: QuestionFormData) => {
-    const processedData = {
-      ...data,
-      options: data.questionType === 'multiple_choice' ? data.options?.filter(Boolean) : null,
+  const getDifficultyBadge = (difficulty: string) => {
+    const difficultyConfig = {
+      easy: { label: "آسان", variant: "default" as const, color: "text-green-600" },
+      medium: { label: "متوسط", variant: "secondary" as const, color: "text-orange-600" },
+      hard: { label: "سخت", variant: "destructive" as const, color: "text-red-600" }
     };
-    createQuestionMutation.mutate(processedData);
+    const config = difficultyConfig[difficulty as keyof typeof difficultyConfig];
+    
+    return (
+      <Badge variant={config.variant} className="text-xs">
+        {config.label}
+      </Badge>
+    );
   };
 
-  const handleEdit = (question: any) => {
-    setEditingQuestion(question);
-    form.reset({
-      question: question.question,
-      questionType: question.questionType,
-      options: question.options || ["", "", "", ""],
-      correctAnswer: question.correctAnswer,
-      subject: question.subject,
-      grade: question.grade,
-      difficulty: question.difficulty,
-      tags: question.tags || [],
-    });
-    setShowCreateForm(true);
+  const getTypeIcon = (type: string) => {
+    const typeIcons = {
+      multiple_choice: CheckCircle,
+      short_answer: HelpCircle,
+      essay: BookOpen,
+      true_false: Target
+    };
+    return typeIcons[type as keyof typeof typeIcons] || HelpCircle;
   };
+
+  const handleCreateQuestion = () => {
+    toast({
+      title: "سؤال ایجاد شد",
+      description: "سؤال جدید با موفقیت به بانک سؤال اضافه شد",
+    });
+    setIsCreateDialogOpen(false);
+    setNewQuestion({
+      title: "",
+      content: "",
+      type: "multiple_choice",
+      subject: "",
+      difficulty: "medium",
+      options: ["", "", "", ""],
+      correctAnswer: 0,
+      explanation: ""
+    });
+  };
+
+  const handleOptionChange = (index: number, value: string) => {
+    const newOptions = [...newQuestion.options];
+    newOptions[index] = value;
+    setNewQuestion(prev => ({ ...prev, options: newOptions }));
+  };
+
+  const filteredQuestions = mockQuestions.filter(question => {
+    const matchesSearch = question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         question.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSubject = selectedSubject === "all" || question.subject === selectedSubject;
+    const matchesDifficulty = selectedDifficulty === "all" || question.difficulty === selectedDifficulty;
+    
+    return matchesSearch && matchesSubject && matchesDifficulty;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -227,410 +183,315 @@ export default function QuestionBank() {
       <div className="flex">
         <Sidebar />
         <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
+          <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">بانک سؤال</h1>
-                <p className="text-gray-600 mt-1">مدیریت و دسته‌بندی سؤالات آزمون</p>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  بانک سؤال
+                </h1>
+                <p className="text-gray-600">
+                  مدیریت و ایجاد سؤالات درسی
+                </p>
               </div>
-              <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-                <DialogTrigger asChild>
-                  <Button className="gap-2">
-                    <Plus className="w-4 h-4" />
-                    سؤال جدید
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingQuestion ? "ویرایش سؤال" : "ایجاد سؤال جدید"}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="question"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>متن سؤال</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="متن سؤال را وارد کنید..." 
-                                {...field} 
-                                rows={3}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="questionType"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>نوع سؤال</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="نوع سؤال را انتخاب کنید" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {questionTypes.map((type) => (
-                                    <SelectItem key={type.value} value={type.value}>
-                                      {type.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+              {(user?.role === 'teacher' || user?.role === 'principal') && (
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2">
+                      <Plus className="w-4 h-4" />
+                      ایجاد سؤال جدید
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>ایجاد سؤال جدید</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="title">عنوان سؤال</Label>
+                        <Input
+                          id="title"
+                          value={newQuestion.title}
+                          onChange={(e) => setNewQuestion(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="عنوان سؤال را وارد کنید"
                         />
-
-                        <FormField
-                          control={form.control}
-                          name="difficulty"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>درجه سختی</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="درجه سختی را انتخاب کنید" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {difficulties.map((difficulty) => (
-                                    <SelectItem key={difficulty.value} value={difficulty.value}>
-                                      {difficulty.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="content">متن سؤال</Label>
+                        <Textarea
+                          id="content"
+                          value={newQuestion.content}
+                          onChange={(e) => setNewQuestion(prev => ({ ...prev, content: e.target.value }))}
+                          placeholder="متن کامل سؤال را وارد کنید"
+                          rows={3}
                         />
                       </div>
 
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="subject"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>درس</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="درس را انتخاب کنید" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {subjects.map((subject) => (
-                                    <SelectItem key={subject} value={subject}>
-                                      {subject}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor="type">نوع سؤال</Label>
+                          <Select value={newQuestion.type} onValueChange={(value) => setNewQuestion(prev => ({ ...prev, type: value }))}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="multiple_choice">چند گزینه‌ای</SelectItem>
+                              <SelectItem value="short_answer">پاسخ کوتاه</SelectItem>
+                              <SelectItem value="essay">تشریحی</SelectItem>
+                              <SelectItem value="true_false">درست/غلط</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                        <FormField
-                          control={form.control}
-                          name="grade"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>پایه تحصیلی</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="پایه را انتخاب کنید" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {grades.map((grade) => (
-                                    <SelectItem key={grade} value={grade}>
-                                      {grade}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        <div>
+                          <Label htmlFor="subject">درس</Label>
+                          <Select value={newQuestion.subject} onValueChange={(value) => setNewQuestion(prev => ({ ...prev, subject: value }))}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="انتخاب درس" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {subjects.map(subject => (
+                                <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="difficulty">سطح دشواری</Label>
+                          <Select value={newQuestion.difficulty} onValueChange={(value) => setNewQuestion(prev => ({ ...prev, difficulty: value }))}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="easy">آسان</SelectItem>
+                              <SelectItem value="medium">متوسط</SelectItem>
+                              <SelectItem value="hard">سخت</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
-                      {form.watch("questionType") === "multiple_choice" && (
-                        <div className="space-y-3">
+                      {newQuestion.type === "multiple_choice" && (
+                        <div>
                           <Label>گزینه‌ها</Label>
-                          {[0, 1, 2, 3].map((index) => (
-                            <FormField
-                              key={index}
-                              control={form.control}
-                              name={`options.${index}`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Input 
-                                      placeholder={`گزینه ${index + 1}`} 
-                                      {...field} 
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          ))}
+                          <div className="space-y-2">
+                            {newQuestion.options.map((option, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                <Input
+                                  value={option}
+                                  onChange={(e) => handleOptionChange(index, e.target.value)}
+                                  placeholder={`گزینه ${index + 1}`}
+                                />
+                                <Button
+                                  type="button"
+                                  variant={newQuestion.correctAnswer === index ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => setNewQuestion(prev => ({ ...prev, correctAnswer: index }))}
+                                >
+                                  {newQuestion.correctAnswer === index ? "صحیح" : "انتخاب"}
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
 
-                      <FormField
-                        control={form.control}
-                        name="correctAnswer"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>پاسخ صحیح</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="پاسخ صحیح را وارد کنید..." 
-                                {...field} 
-                                rows={2}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="flex gap-2 pt-4">
-                        <Button 
-                          type="submit" 
-                          disabled={createQuestionMutation.isPending}
-                          className="flex-1"
-                        >
-                          {createQuestionMutation.isPending ? (
-                            <LoadingSpinner size="sm" />
-                          ) : (
-                            editingQuestion ? "به‌روزرسانی سؤال" : "ایجاد سؤال"
-                          )}
-                        </Button>
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => {
-                            setShowCreateForm(false);
-                            setEditingQuestion(null);
-                            form.reset();
-                          }}
-                          className="flex-1"
-                        >
-                          لغو
-                        </Button>
+                      <div>
+                        <Label htmlFor="explanation">توضیح پاسخ</Label>
+                        <Textarea
+                          id="explanation"
+                          value={newQuestion.explanation}
+                          onChange={(e) => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
+                          placeholder="توضیح پاسخ صحیح را وارد کنید"
+                          rows={2}
+                        />
                       </div>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
+
+                      <Button onClick={handleCreateQuestion} className="w-full">
+                        ایجاد سؤال
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
 
-            {/* Search and Filters */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Search className="w-5 h-5" />
-                  جستجو و فیلتر
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="جستجو در متن سؤالات..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full"
-                    />
+            {/* Stats Cards */}
+            <div className="grid md:grid-cols-4 gap-6 mb-8">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">کل سؤالات</p>
+                      <p className="text-2xl font-bold text-blue-600">{mockQuestions.length}</p>
+                    </div>
+                    <HelpCircle className="w-8 h-8 text-blue-500" />
                   </div>
-                  <Button variant="outline" disabled={isLoading}>
-                    {isLoading ? <LoadingSpinner size="sm" /> : <Search className="w-4 h-4" />}
-                  </Button>
-                </div>
+                </CardContent>
+              </Card>
 
-                <div className="grid md:grid-cols-4 gap-4">
-                  <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="همه دروس" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">همه دروس</SelectItem>
-                      {subjects.map((subject) => (
-                        <SelectItem key={subject} value={subject}>
-                          {subject}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">سؤالات عمومی</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {mockQuestions.filter(q => q.isPublic).length}
+                      </p>
+                    </div>
+                    <Eye className="w-8 h-8 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
 
-                  <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="همه پایه‌ها" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">همه پایه‌ها</SelectItem>
-                      {grades.map((grade) => (
-                        <SelectItem key={grade} value={grade}>
-                          {grade}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">درس‌ها</p>
+                      <p className="text-2xl font-bold text-purple-600">{subjects.length}</p>
+                    </div>
+                    <BookOpen className="w-8 h-8 text-purple-500" />
+                  </div>
+                </CardContent>
+              </Card>
 
-                  <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="همه سطوح" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">همه سطوح</SelectItem>
-                      {difficulties.map((difficulty) => (
-                        <SelectItem key={difficulty.value} value={difficulty.value}>
-                          {difficulty.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">استفاده امروز</p>
+                      <p className="text-2xl font-bold text-orange-600">
+                        {mockQuestions.reduce((sum, q) => sum + q.usageCount, 0)}
+                      </p>
+                    </div>
+                    <Star className="w-8 h-8 text-orange-500" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setSelectedSubject("");
-                      setSelectedGrade("");
-                      setSelectedDifficulty("");
-                      setSearchTerm("");
-                    }}
-                  >
-                    <X className="w-4 h-4 ml-2" />
-                    پاک کردن
-                  </Button>
+            {/* Filters */}
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Input
+                        placeholder="جستجو در سؤالات..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="همه درس‌ها" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">همه درس‌ها</SelectItem>
+                        {subjects.map(subject => (
+                          <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="همه سطوح" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">همه سطوح</SelectItem>
+                        <SelectItem value="easy">آسان</SelectItem>
+                        <SelectItem value="medium">متوسط</SelectItem>
+                        <SelectItem value="hard">سخت</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Questions List */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <HelpCircle className="w-5 h-5" />
-                    لیست سؤالات
-                  </span>
-                  {displayedQuestions.length > 0 && (
-                    <Badge variant="outline">
-                      {displayedQuestions.length} سؤال
-                    </Badge>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {displayedQuestions.length > 0 ? (
-                  <div className="space-y-4">
-                    {displayedQuestions.map((question: any) => (
-                      <div key={question.id} className="p-4 bg-gray-50 rounded-lg">
+            <div className="space-y-4">
+              {filteredQuestions.length > 0 ? (
+                filteredQuestions.map((question) => {
+                  const TypeIcon = getTypeIcon(question.type);
+                  return (
+                    <Card key={question.id}>
+                      <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge className={getDifficultyColor(question.difficulty)}>
-                                <Target className="w-3 h-3 ml-1" />
-                                {getDifficultyLabel(question.difficulty)}
-                              </Badge>
-                              <Badge variant="outline">
-                                {getQuestionTypeLabel(question.questionType)}
-                              </Badge>
-                              <Badge variant="secondary">
-                                <BookOpen className="w-3 h-3 ml-1" />
+                            <div className="flex items-center gap-3 mb-2">
+                              <TypeIcon className="w-5 h-5 text-blue-600" />
+                              <h3 className="text-lg font-semibold">{question.title}</h3>
+                              <Badge variant="outline" className="text-xs">
                                 {question.subject}
                               </Badge>
-                              <Badge variant="secondary">
-                                <GraduationCap className="w-3 h-3 ml-1" />
-                                {question.grade}
-                              </Badge>
+                              {getDifficultyBadge(question.difficulty)}
+                              {question.isPublic && (
+                                <Badge variant="secondary" className="text-xs">
+                                  عمومی
+                                </Badge>
+                              )}
                             </div>
                             
-                            <p className="text-gray-900 font-medium mb-2">{question.question}</p>
+                            <p className="text-gray-600 mb-3">{question.content}</p>
                             
-                            {question.questionType === 'multiple_choice' && question.options && (
-                              <div className="space-y-1 mb-2">
-                                {question.options.map((option: string, index: number) => (
-                                  <div key={index} className="flex items-center text-sm text-gray-600">
-                                    <span className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs font-medium ml-2">
-                                      {String.fromCharCode(65 + index)}
-                                    </span>
-                                    {option}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            
-                            <div className="flex items-center text-sm text-gray-500">
-                              <CheckCircle className="w-4 h-4 ml-1 text-green-500" />
-                              پاسخ صحیح: {question.correctAnswer}
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <span>ایجاد شده توسط: {question.createdBy}</span>
+                              <span>تاریخ: {new Date(question.createdAt).toLocaleDateString('fa-IR')}</span>
+                              <span>استفاده: {question.usageCount} بار</span>
                             </div>
-
-                            {question.tags && question.tags.length > 0 && (
-                              <div className="flex items-center gap-1 mt-2">
-                                <Tag className="w-4 h-4 text-gray-400" />
-                                {question.tags.map((tag: string, index: number) => (
-                                  <Badge key={index} variant="outline" className="text-xs">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
                           </div>
                           
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleEdit(question)}
-                            >
-                              <Edit className="w-4 h-4" />
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" className="gap-2">
+                              <Eye className="w-4 h-4" />
+                              مشاهده
                             </Button>
-                            <Button size="sm" variant="outline">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            {(user?.role === 'teacher' || user?.role === 'principal') && (
+                              <>
+                                <Button variant="outline" size="sm" className="gap-2">
+                                  <Copy className="w-4 h-4" />
+                                  کپی
+                                </Button>
+                                <Button variant="outline" size="sm" className="gap-2">
+                                  <Edit className="w-4 h-4" />
+                                  ویرایش
+                                </Button>
+                                <Button variant="outline" size="sm" className="gap-2 text-red-600">
+                                  <Trash2 className="w-4 h-4" />
+                                  حذف
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : searchTerm || selectedSubject ? (
-                  <EmptyState
-                    title="سؤالی یافت نشد"
-                    description="با فیلترهای انتخابی سؤالی پیدا نشد. فیلترها را تغییر دهید"
-                    icon={<Search className="w-12 h-12" />}
-                  />
-                ) : (
-                  <EmptyState
-                    title="سؤالی وجود ندارد"
-                    description="هنوز سؤالی در بانک سؤال ایجاد نشده است"
-                    icon={<HelpCircle className="w-12 h-12" />}
-                    actionLabel="ایجاد اولین سؤال"
-                    onAction={() => setShowCreateForm(true)}
-                  />
-                )}
-              </CardContent>
-            </Card>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              ) : (
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <HelpCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-lg font-semibold text-gray-500 mb-2">
+                      هیچ سؤالی یافت نشد
+                    </h3>
+                    <p className="text-gray-400">
+                      سؤال جدیدی ایجاد کنید یا فیلترهای جستجو را تغییر دهید
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
         </main>
       </div>

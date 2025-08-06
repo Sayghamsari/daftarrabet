@@ -1,152 +1,156 @@
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { 
-  BarChart3,
+import { Link, useLocation } from "wouter";
+import {
+  Home,
   BookOpen,
   Calendar,
-  FileText,
-  GraduationCap,
-  Home,
-  MessageSquare,
   Users,
   Video,
-  HelpCircle,
+  GraduationCap,
+  BarChart3,
+  FileText,
+  MessageSquare,
   Settings,
+  HelpCircle,
   Brain,
   ClipboardList,
-  UserCheck
+  UserCheck,
+  School
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { Link, useLocation } from "wouter";
-
-interface MenuItem {
-  label: string;
-  href: string;
-  icon: React.ReactNode;
-  roles: string[];
-  badge?: string;
-}
-
-const menuItems: MenuItem[] = [
-  {
-    label: "خانه",
-    href: "/",
-    icon: <Home className="w-5 h-5" />,
-    roles: ["student", "teacher", "counselor", "educational_deputy", "liaison_office", "parent"]
-  },
-  {
-    label: "داشبورد دانش‌آموز",
-    href: "/dashboard/student",
-    icon: <GraduationCap className="w-5 h-5" />,
-    roles: ["student", "parent", "teacher", "counselor", "educational_deputy"]
-  },
-  {
-    label: "داشبورد معلم",
-    href: "/dashboard/teacher",
-    icon: <Users className="w-5 h-5" />,
-    roles: ["teacher", "educational_deputy"]
-  },
-  {
-    label: "داشبورد مشاور",
-    href: "/dashboard/counselor",
-    icon: <MessageSquare className="w-5 h-5" />,
-    roles: ["counselor", "educational_deputy"]
-  },
-  {
-    label: "داشبورد معاون آموزشی",
-    href: "/dashboard/educational-deputy",
-    icon: <BarChart3 className="w-5 h-5" />,
-    roles: ["educational_deputy"],
-    badge: "AI"
-  },
-  {
-    label: "داشبورد دفتر رابط",
-    href: "/dashboard/liaison-office",
-    icon: <FileText className="w-5 h-5" />,
-    roles: ["liaison_office", "educational_deputy"]
-  },
-  {
-    label: "داشبورد والدین",
-    href: "/dashboard/parent",
-    icon: <Users className="w-5 h-5" />,
-    roles: ["parent"]
-  },
-  {
-    label: "تکالیف",
-    href: "/assignments",
-    icon: <BookOpen className="w-5 h-5" />,
-    roles: ["student", "teacher", "parent"]
-  },
-  {
-    label: "حضور و غیاب",
-    href: "/attendance",
-    icon: <UserCheck className="w-5 h-5" />,
-    roles: ["student", "teacher", "parent", "educational_deputy"]
-  },
-  {
-    label: "کلاس آنلاین",
-    href: "/online-classroom",
-    icon: <Video className="w-5 h-5" />,
-    roles: ["student", "teacher"]
-  },
-  {
-    label: "بانک سؤال",
-    href: "/question-bank",
-    icon: <HelpCircle className="w-5 h-5" />,
-    roles: ["teacher", "educational_deputy"]
-  },
-  {
-    label: "آزمون‌ها",
-    href: "/examinations",
-    icon: <ClipboardList className="w-5 h-5" />,
-    roles: ["student", "teacher", "educational_deputy"]
-  }
-];
+import { cn } from "@/lib/utils";
 
 export default function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
 
-  const userRole = user?.role || "";
-  const filteredMenuItems = menuItems.filter(item => item.roles.includes(userRole));
+  const getMenuItems = (role: string) => {
+    const commonItems = [
+      { label: "خانه", href: "/", icon: Home },
+    ];
+
+    const roleMenus = {
+      student: [
+        ...commonItems,
+        { label: "تکالیف", href: "/assignments", icon: BookOpen },
+        { label: "حضور و غیاب", href: "/attendance", icon: Calendar },
+        { label: "کلاس آنلاین", href: "/online-classroom", icon: Video },
+        { label: "آزمون‌ها", href: "/examinations", icon: GraduationCap },
+        { label: "عملکرد", href: "/dashboard/student", icon: BarChart3 },
+      ],
+      teacher: [
+        ...commonItems,
+        { label: "داشبورد", href: "/dashboard/teacher", icon: BarChart3 },
+        { label: "کلاس‌ها", href: "/dashboard/teacher", icon: Users },
+        { label: "تکالیف", href: "/assignments", icon: BookOpen },
+        { label: "حضور و غیاب", href: "/attendance", icon: UserCheck },
+        { label: "بانک سؤال", href: "/question-bank", icon: GraduationCap },
+        { label: "آزمون‌ها", href: "/examinations", icon: ClipboardList },
+        { label: "کلاس آنلاین", href: "/online-classroom", icon: Video },
+      ],
+      counselor: [
+        ...commonItems,
+        { label: "داشبورد", href: "/dashboard/counselor", icon: BarChart3 },
+        { label: "جلسات مشاوره", href: "/dashboard/counselor", icon: MessageSquare },
+        { label: "تحلیل عملکرد", href: "/dashboard/counselor", icon: Brain },
+      ],
+      educational_deputy: [
+        ...commonItems,
+        { label: "داشبورد تحلیلی", href: "/dashboard/educational-deputy", icon: BarChart3 },
+        { label: "نظارت بر کلاس‌ها", href: "/dashboard/educational-deputy", icon: Users },
+        { label: "گزارش‌گیری", href: "/dashboard/educational-deputy", icon: FileText },
+      ],
+      liaison_office: [
+        ...commonItems,
+        { label: "داشبورد", href: "/dashboard/liaison-office", icon: BarChart3 },
+        { label: "مدیریت رویدادها", href: "/dashboard/liaison-office", icon: Calendar },
+        { label: "ثبت‌نام جدید", href: "/dashboard/liaison-office", icon: Users },
+      ],
+      parent: [
+        ...commonItems,
+        { label: "عملکرد فرزند", href: "/dashboard/parent", icon: BarChart3 },
+        { label: "حضور و غیاب", href: "/attendance", icon: Calendar },
+        { label: "تکالیف", href: "/assignments", icon: BookOpen },
+      ],
+      principal: [
+        ...commonItems,
+        { label: "داشبورد مدیریت", href: "/dashboard/principal", icon: BarChart3 },
+        { label: "مدیریت مدرسه", href: "/dashboard/principal", icon: School },
+        { label: "معلمان", href: "/dashboard/principal", icon: Users },
+        { label: "گزارش‌های کلی", href: "/dashboard/principal", icon: FileText },
+      ]
+    };
+
+    return roleMenus[role as keyof typeof roleMenus] || commonItems;
+  };
+
+  const menuItems = getMenuItems(user?.role || "student");
 
   return (
-    <div className="w-64 bg-white border-l border-gray-200 h-full">
-      <ScrollArea className="h-full py-4">
-        <div className="space-y-2 px-3">
-          {filteredMenuItems.map((item) => (
-            <Link key={item.href} href={item.href}>
-              <Button
-                variant={location === item.href ? "secondary" : "ghost"}
-                className={`w-full justify-start gap-3 ${
-                  location === item.href 
-                    ? "bg-primary/10 text-primary hover:bg-primary/20" 
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                {item.icon}
-                <span className="flex-1 text-right">{item.label}</span>
-                {item.badge && (
-                  <Badge variant="secondary" className="text-xs">
-                    {item.badge}
-                  </Badge>
-                )}
+    <div className="w-64 bg-white border-r border-gray-200 h-screen">
+      <ScrollArea className="h-full">
+        <div className="p-6">
+          <div className="space-y-6">
+            {/* User Info */}
+            <div className="text-center">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-lg font-bold text-primary">
+                  {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                </span>
+              </div>
+              <h3 className="font-semibold text-gray-900">
+                {user?.firstName} {user?.lastName}
+              </h3>
+              <p className="text-sm text-gray-500">{user?.email}</p>
+              {user?.isTrialActive && (
+                <Badge variant="outline" className="mt-2 text-xs">
+                  دوره آزمایشی
+                </Badge>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Navigation Menu */}
+            <nav className="space-y-2">
+              {menuItems.map((item, index) => {
+                const Icon = item.icon;
+                const isActive = location === item.href;
+                
+                return (
+                  <Link key={index} href={item.href}>
+                    <Button
+                      variant={isActive ? "default" : "ghost"}
+                      className={cn(
+                        "w-full justify-start gap-3",
+                        isActive && "bg-primary text-primary-foreground"
+                      )}
+                    >
+                      <Icon className="w-5 h-5" />
+                      {item.label}
+                    </Button>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <Separator />
+
+            {/* Bottom Actions */}
+            <div className="space-y-2">
+              <Button variant="ghost" className="w-full justify-start gap-3">
+                <Settings className="w-5 h-5" />
+                تنظیمات
               </Button>
-            </Link>
-          ))}
-        </div>
-        
-        {/* Bottom section */}
-        <div className="mt-8 px-3 space-y-2">
-          <Button variant="ghost" className="w-full justify-start gap-3">
-            <Settings className="w-5 h-5" />
-            <span className="flex-1 text-right">تنظیمات</span>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start gap-3">
-            <HelpCircle className="w-5 h-5" />
-            <span className="flex-1 text-right">راهنما</span>
-          </Button>
+              <Button variant="ghost" className="w-full justify-start gap-3">
+                <HelpCircle className="w-5 h-5" />
+                راهنما
+              </Button>
+            </div>
+          </div>
         </div>
       </ScrollArea>
     </div>

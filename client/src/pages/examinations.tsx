@@ -1,216 +1,198 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import EmptyState from "@/components/common/empty-state";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertExaminationSchema } from "@shared/schema";
-import { z } from "zod";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { 
-  ClipboardList, 
+  GraduationCap, 
   Plus, 
+  Clock, 
   Calendar,
-  Clock,
   Users,
-  Play,
-  Settings,
-  CheckCircle,
-  AlertTriangle,
   FileText,
+  Play,
+  Pause,
+  CheckCircle,
+  XCircle,
+  Award,
+  Target,
   BarChart3,
-  Edit,
-  Trash2,
   Eye
 } from "lucide-react";
-
-const examinationFormSchema = insertExaminationSchema.extend({
-  scheduledAt: z.string(),
-});
-
-type ExaminationFormData = z.infer<typeof examinationFormSchema>;
+import LoadingSpinner from "@/components/common/loading-spinner";
 
 export default function Examinations() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedExam, setSelectedExam] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("overview");
-
-  const form = useForm<ExaminationFormData>({
-    resolver: zodResolver(examinationFormSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      classId: "",
-      teacherId: user?.id || "",
-      scheduledAt: "",
-      duration: 60,
-      totalScore: 20,
-      isPublished: false,
-    },
+  const [newExam, setNewExam] = useState({
+    title: "",
+    description: "",
+    subject: "",
+    duration: "60",
+    totalQuestions: "20",
+    date: "",
+    time: "",
+    passingScore: "60"
   });
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       toast({
         title: "غیر مجاز",
         description: "شما از سیستم خارج شده‌اید. در حال ورود مجدد...",
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/auth";
       }, 500);
       return;
     }
-  }, [isAuthenticated, authLoading, toast]);
+  }, [isAuthenticated, isLoading, toast]);
 
-  // Fetch classes for teacher/student
-  const { data: classes } = useQuery({
-    queryKey: user?.role === 'teacher' 
-      ? ["/api/classes/teacher", user?.id]
-      : ["/api/classes/student", user?.id],
-    enabled: !!user?.id && isAuthenticated,
-    retry: false,
-  });
-
-  // Fetch examinations
-  const { data: examinations, isLoading } = useQuery({
-    queryKey: user?.role === 'teacher'
-      ? ["/api/examinations/teacher", user?.id]
-      : ["/api/examinations/student", user?.id],
-    enabled: !!user?.id && isAuthenticated,
-    retry: false,
-  });
-
-  // Fetch specific class examinations if needed
-  const { data: classExaminations } = useQuery({
-    queryKey: ["/api/examinations/class", selectedExam?.classId],
-    enabled: !!selectedExam?.classId && isAuthenticated,
-    retry: false,
-  });
-
-  const createExaminationMutation = useMutation({
-    mutationFn: async (examData: ExaminationFormData) => {
-      const processedData = {
-        ...examData,
-        scheduledAt: new Date(examData.scheduledAt).toISOString(),
-      };
-      await apiRequest("POST", "/api/examinations", processedData);
+  // Mock data - در آینده از API واقعی دریافت خواهد شد
+  const mockExams = [
+    {
+      id: 1,
+      title: "آزمون میان‌ترم ریاضی",
+      description: "آزمون میان‌ترم فصل هندسه و جبر",
+      subject: "ریاضی",
+      teacher: "فاطمه کریمی",
+      date: "2024-08-10",
+      time: "09:00",
+      duration: 90,
+      totalQuestions: 25,
+      passingScore: 60,
+      status: "scheduled",
+      participants: 0,
+      maxParticipants: 30,
+      myScore: null,
+      attempts: 0,
+      maxAttempts: 1
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/examinations"] });
-      setShowCreateForm(false);
-      form.reset();
-      toast({
-        title: "موفق",
-        description: "آزمون با موفقیت ایجاد شد",
-      });
+    {
+      id: 2,
+      title: "آزمون عملی فیزیک",
+      description: "آزمون عملی آزمایشگاه فیزیک",
+      subject: "فیزیک",
+      teacher: "محمد رضایی",
+      date: "2024-08-08",
+      time: "14:00",
+      duration: 60,
+      totalQuestions: 15,
+      passingScore: 70,
+      status: "in_progress",
+      participants: 12,
+      maxParticipants: 25,
+      myScore: null,
+      attempts: 0,
+      maxAttempts: 2
     },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "غیر مجاز",
-          description: "شما از سیستم خارج شده‌اید. در حال ورود مجدد...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "خطا",
-        description: "خطا در ایجاد آزمون",
-        variant: "destructive",
-      });
+    {
+      id: 3,
+      title: "آزمون نهایی شیمی",
+      description: "آزمون پایان ترم شیمی معدنی",
+      subject: "شیمی",
+      teacher: "علی محمدی",
+      date: "2024-08-05",
+      time: "10:00",
+      duration: 120,
+      totalQuestions: 30,
+      passingScore: 65,
+      status: "completed",
+      participants: 28,
+      maxParticipants: 30,
+      myScore: 85,
+      attempts: 1,
+      maxAttempts: 1
     }
-  });
+  ];
 
-  if (authLoading || isLoading) {
+  const subjects = ["ریاضی", "فیزیک", "شیمی", "زیست‌شناسی", "ادبیات", "تاریخ"];
+
+  if (isLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1 p-6">
-            <div className="flex items-center justify-center h-64">
-              <LoadingSpinner />
-            </div>
-          </main>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  const getStatusColor = (exam: any) => {
-    const now = new Date();
-    const examDate = new Date(exam.scheduledAt);
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      scheduled: { label: "برنامه‌ریزی شده", variant: "secondary" as const, color: "text-blue-600" },
+      in_progress: { label: "در حال برگزاری", variant: "default" as const, color: "text-orange-600" },
+      completed: { label: "تمام شده", variant: "outline" as const, color: "text-gray-600" }
+    };
+    const config = statusConfig[status as keyof typeof statusConfig];
     
-    if (!exam.isPublished) {
-      return 'bg-gray-100 text-gray-800';
-    } else if (examDate > now) {
-      return 'bg-blue-100 text-blue-800';
+    return (
+      <Badge variant={config.variant} className="gap-1">
+        {status === 'in_progress' && <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>}
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const getScoreBadge = (score: number, passingScore: number) => {
+    if (score >= passingScore + 20) {
+      return <Badge className="bg-green-500">عالی ({score})</Badge>;
+    } else if (score >= passingScore + 10) {
+      return <Badge className="bg-blue-500">خوب ({score})</Badge>;
+    } else if (score >= passingScore) {
+      return <Badge className="bg-yellow-500">قبولی ({score})</Badge>;
     } else {
-      return 'bg-green-100 text-green-800';
+      return <Badge variant="destructive">مردود ({score})</Badge>;
     }
   };
 
-  const getStatusLabel = (exam: any) => {
-    const now = new Date();
-    const examDate = new Date(exam.scheduledAt);
-    
-    if (!exam.isPublished) {
-      return 'پیش‌نویس';
-    } else if (examDate > now) {
-      return 'برنامه‌ریزی شده';
+  const handleCreateExam = () => {
+    toast({
+      title: "آزمون ایجاد شد",
+      description: "آزمون جدید با موفقیت ایجاد شد",
+    });
+    setIsCreateDialogOpen(false);
+    setNewExam({
+      title: "",
+      description: "",
+      subject: "",
+      duration: "60",
+      totalQuestions: "20",
+      date: "",
+      time: "",
+      passingScore: "60"
+    });
+  };
+
+  const handleStartExam = (exam: any) => {
+    if (exam.status === 'in_progress') {
+      toast({
+        title: "شروع آزمون",
+        description: `آزمون ${exam.title} شروع شد`,
+      });
     } else {
-      return 'برگزار شده';
+      toast({
+        title: "آزمون در دسترس نیست",
+        description: "این آزمون هنوز شروع نشده یا به پایان رسیده است",
+        variant: "destructive",
+      });
     }
   };
 
-  const isUpcoming = (exam: any) => {
-    const now = new Date();
-    const examDate = new Date(exam.scheduledAt);
-    return examDate > now && exam.isPublished;
-  };
-
-  const isPast = (exam: any) => {
-    const now = new Date();
-    const examDate = new Date(exam.scheduledAt);
-    return examDate < now;
-  };
-
-  const onSubmit = (data: ExaminationFormData) => {
-    createExaminationMutation.mutate(data);
-  };
-
-  const stats = {
-    total: examinations?.length || 0,
-    upcoming: examinations?.filter(isUpcoming).length || 0,
-    past: examinations?.filter(isPast).length || 0,
-    drafts: examinations?.filter((e: any) => !e.isPublished).length || 0,
-  };
+  const scheduledExams = mockExams.filter(e => e.status === 'scheduled');
+  const inProgressExams = mockExams.filter(e => e.status === 'in_progress');
+  const completedExams = mockExams.filter(e => e.status === 'completed');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -218,440 +200,415 @@ export default function Examinations() {
       <div className="flex">
         <Sidebar />
         <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
+          <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">آزمون‌ها</h1>
-                <p className="text-gray-600 mt-1">
-                  {user?.role === 'teacher' 
-                    ? 'مدیریت و برگزاری آزمون‌های آنلاین' 
-                    : 'مشاهده و شرکت در آزمون‌ها'}
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  آزمون‌ها
+                </h1>
+                <p className="text-gray-600">
+                  مدیریت و شرکت در آزمون‌های درسی
                 </p>
               </div>
-              {user?.role === 'teacher' && (
-                <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
+              {(user?.role === 'teacher' || user?.role === 'principal') && (
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
                     <Button className="gap-2">
                       <Plus className="w-4 h-4" />
-                      آزمون جدید
+                      ایجاد آزمون جدید
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-md">
+                  <DialogContent className="max-w-2xl">
                     <DialogHeader>
                       <DialogTitle>ایجاد آزمون جدید</DialogTitle>
                     </DialogHeader>
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                          control={form.control}
-                          name="title"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>عنوان آزمون</FormLabel>
-                              <FormControl>
-                                <Input placeholder="آزمون میان‌ترم ریاضی" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="title">عنوان آزمون</Label>
+                        <Input
+                          id="title"
+                          value={newExam.title}
+                          onChange={(e) => setNewExam(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="عنوان آزمون را وارد کنید"
                         />
-
-                        <FormField
-                          control={form.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>توضیحات</FormLabel>
-                              <FormControl>
-                                <Textarea 
-                                  placeholder="توضیحات آزمون..."
-                                  {...field}
-                                  rows={3}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="description">توضیحات</Label>
+                        <Textarea
+                          id="description"
+                          value={newExam.description}
+                          onChange={(e) => setNewExam(prev => ({ ...prev, description: e.target.value }))}
+                          placeholder="توضیحات آزمون"
+                          rows={3}
                         />
+                      </div>
 
-                        <FormField
-                          control={form.control}
-                          name="classId"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>کلاس</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="کلاس را انتخاب کنید" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {classes?.map((cls: any) => (
-                                    <SelectItem key={cls.id} value={cls.id}>
-                                      {cls.name} - {cls.subject}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="subject">درس</Label>
+                          <Select value={newExam.subject} onValueChange={(value) => setNewExam(prev => ({ ...prev, subject: value }))}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="انتخاب درس" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {subjects.map(subject => (
+                                <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                        <FormField
-                          control={form.control}
-                          name="scheduledAt"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>زمان برگزاری</FormLabel>
-                              <FormControl>
-                                <Input type="datetime-local" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            control={form.control}
-                            name="duration"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>مدت زمان (دقیقه)</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="number" 
-                                    {...field}
-                                    onChange={(e) => field.onChange(parseInt(e.target.value))}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
+                        <div>
+                          <Label htmlFor="duration">مدت زمان (دقیقه)</Label>
+                          <Input
+                            id="duration"
+                            type="number"
+                            value={newExam.duration}
+                            onChange={(e) => setNewExam(prev => ({ ...prev, duration: e.target.value }))}
+                            placeholder="60"
                           />
+                        </div>
+                      </div>
 
-                          <FormField
-                            control={form.control}
-                            name="totalScore"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>نمره کل</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="number" 
-                                    step="0.5"
-                                    {...field}
-                                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="totalQuestions">تعداد سؤال</Label>
+                          <Input
+                            id="totalQuestions"
+                            type="number"
+                            value={newExam.totalQuestions}
+                            onChange={(e) => setNewExam(prev => ({ ...prev, totalQuestions: e.target.value }))}
+                            placeholder="20"
                           />
                         </div>
 
-                        <div className="flex gap-2 pt-4">
-                          <Button 
-                            type="submit" 
-                            disabled={createExaminationMutation.isPending}
-                            className="flex-1"
-                          >
-                            {createExaminationMutation.isPending ? (
-                              <LoadingSpinner size="sm" />
-                            ) : (
-                              "ایجاد آزمون"
-                            )}
-                          </Button>
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            onClick={() => setShowCreateForm(false)}
-                            className="flex-1"
-                          >
-                            لغو
-                          </Button>
+                        <div>
+                          <Label htmlFor="passingScore">نمره قبولی</Label>
+                          <Input
+                            id="passingScore"
+                            type="number"
+                            value={newExam.passingScore}
+                            onChange={(e) => setNewExam(prev => ({ ...prev, passingScore: e.target.value }))}
+                            placeholder="60"
+                          />
                         </div>
-                      </form>
-                    </Form>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="date">تاریخ</Label>
+                          <Input
+                            id="date"
+                            type="date"
+                            value={newExam.date}
+                            onChange={(e) => setNewExam(prev => ({ ...prev, date: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="time">ساعت</Label>
+                          <Input
+                            id="time"
+                            type="time"
+                            value={newExam.time}
+                            onChange={(e) => setNewExam(prev => ({ ...prev, time: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+
+                      <Button onClick={handleCreateExam} className="w-full">
+                        ایجاد آزمون
+                      </Button>
+                    </div>
                   </DialogContent>
                 </Dialog>
               )}
             </div>
 
-            {/* Teacher View */}
-            {user?.role === 'teacher' && (
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList>
-                  <TabsTrigger value="overview">نمای کلی</TabsTrigger>
-                  <TabsTrigger value="questions">مدیریت سؤالات</TabsTrigger>
-                  <TabsTrigger value="results">نتایج</TabsTrigger>
-                  <TabsTrigger value="analytics">تحلیل‌ها</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="overview" className="space-y-6">
-                  {/* Stats Cards */}
-                  <div className="grid md:grid-cols-4 gap-6">
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-gray-600">کل آزمون‌ها</p>
-                            <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
-                          </div>
-                          <ClipboardList className="w-8 h-8 text-blue-500" />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-gray-600">آزمون‌های آتی</p>
-                            <p className="text-2xl font-bold text-green-600">{stats.upcoming}</p>
-                          </div>
-                          <Calendar className="w-8 h-8 text-green-500" />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-gray-600">برگزار شده</p>
-                            <p className="text-2xl font-bold text-purple-600">{stats.past}</p>
-                          </div>
-                          <CheckCircle className="w-8 h-8 text-purple-500" />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-gray-600">پیش‌نویس</p>
-                            <p className="text-2xl font-bold text-orange-600">{stats.drafts}</p>
-                          </div>
-                          <FileText className="w-8 h-8 text-orange-500" />
-                        </div>
-                      </CardContent>
-                    </Card>
+            {/* Stats Cards */}
+            <div className="grid md:grid-cols-4 gap-6 mb-8">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">کل آزمون‌ها</p>
+                      <p className="text-2xl font-bold text-blue-600">{mockExams.length}</p>
+                    </div>
+                    <GraduationCap className="w-8 h-8 text-blue-500" />
                   </div>
+                </CardContent>
+              </Card>
 
-                  {/* Examinations List */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>لیست آزمون‌ها</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {examinations && examinations.length > 0 ? (
-                        <div className="space-y-4">
-                          {examinations.map((exam: any) => (
-                            <div key={exam.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                              <div className="flex-1">
-                                <h3 className="font-medium text-gray-900">{exam.title}</h3>
-                                <p className="text-sm text-gray-500 mt-1">{exam.description}</p>
-                                <div className="flex items-center gap-4 mt-2">
-                                  <span className="text-xs text-gray-400 flex items-center">
-                                    <Calendar className="w-3 h-3 ml-1" />
-                                    {new Date(exam.scheduledAt).toLocaleDateString('fa-IR')}
-                                  </span>
-                                  <span className="text-xs text-gray-400 flex items-center">
-                                    <Clock className="w-3 h-3 ml-1" />
-                                    {exam.duration} دقیقه
-                                  </span>
-                                  <span className="text-xs text-gray-400 flex items-center">
-                                    <BarChart3 className="w-3 h-3 ml-1" />
-                                    {exam.totalScore} نمره
-                                  </span>
-                                </div>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">در حال برگزاری</p>
+                      <p className="text-2xl font-bold text-orange-600">{inProgressExams.length}</p>
+                    </div>
+                    <Play className="w-8 h-8 text-orange-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">برنامه‌ریزی شده</p>
+                      <p className="text-2xl font-bold text-purple-600">{scheduledExams.length}</p>
+                    </div>
+                    <Calendar className="w-8 h-8 text-purple-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">میانگین نمرات</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {completedExams.filter(e => e.myScore).length > 0 
+                          ? Math.round(completedExams.filter(e => e.myScore).reduce((sum, e) => sum + (e.myScore || 0), 0) / completedExams.filter(e => e.myScore).length)
+                          : "-"
+                        }
+                      </p>
+                    </div>
+                    <Award className="w-8 h-8 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Tabs defaultValue="in_progress" className="space-y-6">
+              <TabsList>
+                <TabsTrigger value="in_progress">در حال برگزاری</TabsTrigger>
+                <TabsTrigger value="scheduled">برنامه‌ریزی شده</TabsTrigger>
+                <TabsTrigger value="completed">تمام شده</TabsTrigger>
+                <TabsTrigger value="results">نتایج</TabsTrigger>
+              </TabsList>
+
+              {/* In Progress Exams */}
+              <TabsContent value="in_progress" className="space-y-4">
+                {inProgressExams.length > 0 ? (
+                  inProgressExams.map((exam) => (
+                    <Card key={exam.id} className="border-orange-200 bg-orange-50">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="text-lg font-semibold">{exam.title}</h3>
+                              {getStatusBadge(exam.status)}
+                            </div>
+                            <p className="text-gray-600 mb-3">{exam.description}</p>
+                            <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                              <div className="flex items-center gap-1">
+                                <FileText className="w-4 h-4" />
+                                {exam.subject}
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Badge className={getStatusColor(exam)}>
-                                  {getStatusLabel(exam)}
-                                </Badge>
-                                <Button size="sm" variant="outline">
-                                  <Edit className="w-4 h-4 ml-1" />
-                                  ویرایش
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <Eye className="w-4 h-4 ml-1" />
-                                  مشاهده
-                                </Button>
-                                {isUpcoming(exam) && (
-                                  <Button size="sm">
-                                    <Play className="w-4 h-4 ml-1" />
-                                    شروع
-                                  </Button>
-                                )}
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                {exam.duration} دقیقه
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Target className="w-4 h-4" />
+                                {exam.totalQuestions} سؤال
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Users className="w-4 h-4" />
+                                {exam.participants}/{exam.maxParticipants} شرکت‌کننده
                               </div>
                             </div>
-                          ))}
+                            <div className="flex items-center gap-2 text-sm">
+                              <span>پیشرفت آزمون:</span>
+                              <Progress value={65} className="w-32" />
+                              <span>65%</span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={() => handleStartExam(exam)}
+                              className="gap-2 bg-orange-600 hover:bg-orange-700"
+                            >
+                              <Play className="w-4 h-4" />
+                              شرکت در آزمون
+                            </Button>
+                          </div>
                         </div>
-                      ) : (
-                        <EmptyState
-                          title="آزمونی وجود ندارد"
-                          description="شما هنوز آزمونی ایجاد نکرده‌اید"
-                          icon={<ClipboardList className="w-12 h-12" />}
-                          actionLabel="ایجاد آزمون جدید"
-                          onAction={() => setShowCreateForm(true)}
-                        />
-                      )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="questions" className="space-y-6">
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
                   <Card>
-                    <CardHeader>
-                      <CardTitle>مدیریت سؤالات آزمون</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-600">مدیریت سؤالات در نسخه‌های بعدی اضافه خواهد شد.</p>
+                    <CardContent className="p-12 text-center">
+                      <Play className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                      <h3 className="text-lg font-semibold text-gray-500 mb-2">
+                        هیچ آزمونی در حال برگزاری نیست
+                      </h3>
+                      <p className="text-gray-400">
+                        آزمون‌های برنامه‌ریزی شده را در تب بعدی مشاهده کنید
+                      </p>
                     </CardContent>
                   </Card>
-                </TabsContent>
+                )}
+              </TabsContent>
 
-                <TabsContent value="results" className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>نتایج آزمون‌ها</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-600">نتایج و گزارش‌ها در نسخه‌های بعدی اضافه خواهد شد.</p>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="analytics" className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>تحلیل‌های آماری</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-600">تحلیل‌های تفصیلی در نسخه‌های بعدی اضافه خواهد شد.</p>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            )}
-
-            {/* Student View */}
-            {user?.role === 'student' && (
-              <div className="space-y-6">
-                {/* Upcoming Exams */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calendar className="w-5 h-5" />
-                      آزمون‌های آتی
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {examinations?.filter(isUpcoming).length > 0 ? (
-                      <div className="grid gap-4">
-                        {examinations.filter(isUpcoming).map((exam: any) => (
-                          <div key={exam.id} className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h3 className="font-medium text-blue-900">{exam.title}</h3>
-                                <p className="text-sm text-blue-700 mt-1">{exam.description}</p>
-                                <div className="flex items-center gap-4 mt-2 text-sm text-blue-600">
-                                  <span className="flex items-center">
-                                    <Calendar className="w-4 h-4 ml-1" />
-                                    {new Date(exam.scheduledAt).toLocaleDateString('fa-IR')}
-                                  </span>
-                                  <span className="flex items-center">
-                                    <Clock className="w-4 h-4 ml-1" />
-                                    {new Date(exam.scheduledAt).toLocaleTimeString('fa-IR', {
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    })}
-                                  </span>
-                                  <span className="flex items-center">
-                                    <Clock className="w-4 h-4 ml-1" />
-                                    {exam.duration} دقیقه
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge className="bg-blue-100 text-blue-800">
-                                  آماده شرکت
-                                </Badge>
-                                <Button>
-                                  <Play className="w-4 h-4 ml-1" />
-                                  شرکت در آزمون
-                                </Button>
-                              </div>
+              {/* Scheduled Exams */}
+              <TabsContent value="scheduled" className="space-y-4">
+                {scheduledExams.map((exam) => (
+                  <Card key={exam.id}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold">{exam.title}</h3>
+                            {getStatusBadge(exam.status)}
+                          </div>
+                          <p className="text-gray-600 mb-3">{exam.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <FileText className="w-4 h-4" />
+                              {exam.subject}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              {new Date(exam.date).toLocaleDateString('fa-IR')}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              {exam.time} - {exam.duration} دقیقه
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Target className="w-4 h-4" />
+                              {exam.totalQuestions} سؤال
                             </div>
                           </div>
-                        ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Eye className="w-4 h-4" />
+                            جزئیات
+                          </Button>
+                        </div>
                       </div>
-                    ) : (
-                      <EmptyState
-                        title="آزمون آتی وجود ندارد"
-                        description="در حال حاضر آزمونی برنامه‌ریزی نشده است"
-                        icon={<Calendar className="w-12 h-12" />}
-                      />
-                    )}
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                ))}
+              </TabsContent>
 
-                {/* Past Exams */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5" />
-                      آزمون‌های برگزار شده
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {examinations?.filter(isPast).length > 0 ? (
+              {/* Completed Exams */}
+              <TabsContent value="completed" className="space-y-4">
+                {completedExams.map((exam) => (
+                  <Card key={exam.id} className="opacity-90">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold">{exam.title}</h3>
+                            {getStatusBadge(exam.status)}
+                            {exam.myScore && getScoreBadge(exam.myScore, exam.passingScore)}
+                          </div>
+                          <p className="text-gray-600 mb-3">{exam.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <FileText className="w-4 h-4" />
+                              {exam.subject}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              {new Date(exam.date).toLocaleDateString('fa-IR')}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Users className="w-4 h-4" />
+                              {exam.participants} شرکت‌کننده
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Award className="w-4 h-4" />
+                              نمره قبولی: {exam.passingScore}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <BarChart3 className="w-4 h-4" />
+                            نتایج
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </TabsContent>
+
+              {/* Results Tab */}
+              <TabsContent value="results" className="space-y-6">
+                <div className="grid lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BarChart3 className="w-5 h-5" />
+                        آمار عملکرد
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
                       <div className="space-y-4">
-                        {examinations.filter(isPast).map((exam: any) => (
-                          <div key={exam.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        {completedExams.filter(e => e.myScore).map((exam) => (
+                          <div key={exam.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div>
-                              <h3 className="font-medium text-gray-900">{exam.title}</h3>
-                              <p className="text-sm text-gray-500 mt-1">{exam.description}</p>
-                              <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                                <span className="flex items-center">
-                                  <Calendar className="w-4 h-4 ml-1" />
-                                  {new Date(exam.scheduledAt).toLocaleDateString('fa-IR')}
-                                </span>
-                                <span className="flex items-center">
-                                  <BarChart3 className="w-4 h-4 ml-1" />
-                                  {exam.totalScore} نمره
-                                </span>
-                              </div>
+                              <p className="font-medium">{exam.subject}</p>
+                              <p className="text-sm text-gray-500">{exam.title}</p>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-green-100 text-green-800">
-                                برگزار شده
-                              </Badge>
-                              <Button size="sm" variant="outline">
-                                <Eye className="w-4 h-4 ml-1" />
-                                مشاهده نتیجه
-                              </Button>
+                            <div className="text-left">
+                              <p className="font-bold text-lg">{exam.myScore}/100</p>
+                              <p className="text-xs text-gray-500">
+                                {exam.myScore && exam.myScore >= exam.passingScore ? "قبول" : "مردود"}
+                              </p>
                             </div>
                           </div>
                         ))}
                       </div>
-                    ) : (
-                      <EmptyState
-                        title="آزمون برگزار شده‌ای وجود ندارد"
-                        description="هنوز در آزمونی شرکت نکرده‌اید"
-                        icon={<CheckCircle className="w-12 h-12" />}
-                      />
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Award className="w-5 h-5" />
+                        وضعیت کلی
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="text-center p-6 bg-blue-50 rounded-lg">
+                          <div className="text-3xl font-bold text-blue-600 mb-2">
+                            {completedExams.filter(e => e.myScore).length}
+                          </div>
+                          <p className="text-sm text-gray-600">آزمون‌های شرکت کرده</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center p-4 bg-green-50 rounded-lg">
+                            <div className="text-xl font-bold text-green-600">
+                              {completedExams.filter(e => e.myScore && e.myScore >= e.passingScore).length}
+                            </div>
+                            <p className="text-xs text-gray-600">قبولی</p>
+                          </div>
+                          
+                          <div className="text-center p-4 bg-red-50 rounded-lg">
+                            <div className="text-xl font-bold text-red-600">
+                              {completedExams.filter(e => e.myScore && e.myScore < e.passingScore).length}
+                            </div>
+                            <p className="text-xs text-gray-600">مردودی</p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
       </div>

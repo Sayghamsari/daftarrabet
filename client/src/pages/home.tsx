@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,9 +16,12 @@ import {
   TrendingUp,
   Clock,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Bell,
+  ArrowRight
 } from "lucide-react";
 import { Link } from "wouter";
+import LoadingSpinner from "@/components/common/loading-spinner";
 
 export default function Home() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -33,7 +35,7 @@ export default function Home() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/auth";
       }, 500);
       return;
     }
@@ -42,7 +44,7 @@ export default function Home() {
   if (isLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <LoadingSpinner />
       </div>
     );
   }
@@ -54,46 +56,97 @@ export default function Home() {
       counselor: "مشاور",
       educational_deputy: "معاون آموزشی",
       liaison_office: "دفتر رابط",
-      parent: "ولی"
+      parent: "ولی",
+      principal: "مدیر"
     };
     return roleLabels[role as keyof typeof roleLabels] || role;
-  };
-
-  const getDashboardLink = (role: string) => {
-    return `/dashboard/${role.replace('_', '-')}`;
   };
 
   const getQuickActions = (role: string) => {
     const actions = {
       student: [
-        { label: "مشاهده تکالیف", href: "/assignments", icon: <BookOpen className="w-5 h-5" /> },
-        { label: "ورود به کلاس", href: "/online-classroom", icon: <Video className="w-5 h-5" /> },
-        { label: "حضور و غیاب", href: "/attendance", icon: <Calendar className="w-5 h-5" /> }
+        { label: "مشاهده تکالیف", href: "/assignments", icon: BookOpen, description: "تکالیف و پروژه‌های درسی" },
+        { label: "ورود به کلاس", href: "/online-classroom", icon: Video, description: "کلاس‌های آنلاین" },
+        { label: "حضور و غیاب", href: "/attendance", icon: Calendar, description: "وضعیت حضور در کلاس‌ها" },
+        { label: "آزمون‌ها", href: "/examinations", icon: GraduationCap, description: "آزمون‌ها و نمرات" }
       ],
       teacher: [
-        { label: "مدیریت کلاس‌ها", href: "/dashboard/teacher", icon: <Users className="w-5 h-5" /> },
-        { label: "ایجاد تکلیف", href: "/assignments", icon: <BookOpen className="w-5 h-5" /> },
-        { label: "بانک سؤال", href: "/question-bank", icon: <GraduationCap className="w-5 h-5" /> }
+        { label: "مدیریت کلاس‌ها", href: "/dashboard/teacher", icon: Users, description: "کلاس‌ها و دانش‌آموزان" },
+        { label: "ایجاد تکلیف", href: "/assignments", icon: BookOpen, description: "تکالیف و پروژه‌ها" },
+        { label: "بانک سؤال", href: "/question-bank", icon: GraduationCap, description: "مدیریت سؤالات" },
+        { label: "کلاس آنلاین", href: "/online-classroom", icon: Video, description: "برگزاری کلاس مجازی" }
       ],
       counselor: [
-        { label: "جلسات مشاوره", href: "/dashboard/counselor", icon: <Users className="w-5 h-5" /> },
-        { label: "تحلیل عملکرد", href: "/dashboard/counselor", icon: <BarChart3 className="w-5 h-5" /> }
+        { label: "جلسات مشاوره", href: "/dashboard/counselor", icon: Users, description: "برنامه‌ریزی جلسات" },
+        { label: "تحلیل عملکرد", href: "/dashboard/counselor", icon: BarChart3, description: "بررسی وضعیت دانش‌آموزان" }
       ],
-      educational_deputy: [
-        { label: "داشبورد تحلیلی", href: "/dashboard/educational-deputy", icon: <BarChart3 className="w-5 h-5" /> },
-        { label: "نظارت بر کلاس‌ها", href: "/dashboard/educational-deputy", icon: <Users className="w-5 h-5" /> }
-      ],
-      liaison_office: [
-        { label: "مدیریت رویدادها", href: "/dashboard/liaison-office", icon: <Calendar className="w-5 h-5" /> },
-        { label: "ثبت‌نام جدید", href: "/dashboard/liaison-office", icon: <Users className="w-5 h-5" /> }
-      ],
-      parent: [
-        { label: "عملکرد فرزند", href: "/dashboard/parent", icon: <BarChart3 className="w-5 h-5" /> },
-        { label: "حضور و غیاب", href: "/attendance", icon: <Calendar className="w-5 h-5" /> }
+      principal: [
+        { label: "داشبورد مدیریت", href: "/dashboard/principal", icon: BarChart3, description: "آمار و گزارش‌ها" },
+        { label: "مدیریت معلمان", href: "/dashboard/principal", icon: Users, description: "کادر آموزشی" },
+        { label: "گزارش‌های کلی", href: "/dashboard/principal", icon: TrendingUp, description: "عملکرد کلی مدرسه" }
       ]
     };
-    return actions[role as keyof typeof actions] || [];
+    return actions[role as keyof typeof actions] || actions.student;
   };
+
+  // Mock data for dashboard
+  const mockStats = {
+    student: {
+      pendingAssignments: 3,
+      completedAssignments: 12,
+      attendanceRate: 92,
+      upcomingExams: 2
+    },
+    teacher: {
+      totalStudents: 120,
+      activeClasses: 5,
+      pendingGrades: 18,
+      upcomingClasses: 3
+    },
+    principal: {
+      totalStudents: 450,
+      totalTeachers: 25,
+      activeClasses: 30,
+      monthlyAttendance: 88
+    }
+  };
+
+  const getCurrentStats = () => {
+    if (user?.role === 'teacher' || user?.role === 'principal') {
+      return mockStats[user.role] || mockStats.teacher;
+    }
+    return mockStats.student;
+  };
+
+  const getStatCards = (role: string) => {
+    const stats = getCurrentStats();
+    
+    if (role === 'student') {
+      return [
+        { label: "تکالیف باقی‌مانده", value: stats.pendingAssignments, icon: BookOpen, color: "text-orange-600" },
+        { label: "تکالیف تکمیل شده", value: stats.completedAssignments, icon: CheckCircle2, color: "text-green-600" },
+        { label: "درصد حضور", value: `${stats.attendanceRate}%`, icon: Calendar, color: "text-blue-600" },
+        { label: "آزمون‌های پیش رو", value: stats.upcomingExams, icon: GraduationCap, color: "text-purple-600" }
+      ];
+    } else if (role === 'teacher') {
+      return [
+        { label: "کل دانش‌آموزان", value: stats.totalStudents, icon: Users, color: "text-blue-600" },
+        { label: "کلاس‌های فعال", value: stats.activeClasses, icon: Video, color: "text-green-600" },
+        { label: "نمرات معلق", value: stats.pendingGrades, icon: GraduationCap, color: "text-orange-600" },
+        { label: "کلاس‌های آینده", value: stats.upcomingClasses, icon: Clock, color: "text-purple-600" }
+      ];
+    } else {
+      return [
+        { label: "کل دانش‌آموزان", value: stats.totalStudents, icon: Users, color: "text-blue-600" },
+        { label: "کل معلمان", value: stats.totalTeachers, icon: Users, color: "text-green-600" },
+        { label: "کلاس‌های فعال", value: stats.activeClasses, icon: Video, color: "text-orange-600" },
+        { label: "حضور ماهانه", value: `${stats.monthlyAttendance}%`, icon: TrendingUp, color: "text-purple-600" }
+      ];
+    }
+  };
+
+  const quickActions = getQuickActions(user?.role || "student");
+  const statCards = getStatCards(user?.role || "student");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -110,125 +163,108 @@ export default function Home() {
                     خوش آمدید، {user?.firstName} {user?.lastName}
                   </h1>
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-primary/10 text-primary">
+                    <p className="text-gray-600">
                       {getRoleLabel(user?.role || "")}
-                    </Badge>
+                    </p>
                     {user?.isTrialActive && (
-                      <Badge variant="outline" className="text-orange-600 border-orange-300">
-                        <Clock className="w-3 h-3 ml-1" />
+                      <Badge variant="outline" className="text-xs">
                         دوره آزمایشی
                       </Badge>
                     )}
                   </div>
                 </div>
-                <Link href={getDashboardLink(user?.role || "")}>
-                  <Button className="gap-2">
-                    <BarChart3 className="w-4 h-4" />
-                    مشاهده داشبورد
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Bell className="w-4 h-4" />
+                    اعلان‌ها
                   </Button>
-                </Link>
+                </div>
               </div>
             </div>
 
-            {/* Quick Stats */}
+            {/* Stats Cards */}
             <div className="grid md:grid-cols-4 gap-6 mb-8">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">وضعیت امروز</p>
-                      <p className="text-2xl font-bold text-green-600">فعال</p>
-                    </div>
-                    <CheckCircle2 className="w-8 h-8 text-green-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">کلاس‌های امروز</p>
-                      <p className="text-2xl font-bold text-blue-600">4</p>
-                    </div>
-                    <Calendar className="w-8 h-8 text-blue-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">تکالیف در انتظار</p>
-                      <p className="text-2xl font-bold text-orange-600">2</p>
-                    </div>
-                    <AlertTriangle className="w-8 h-8 text-orange-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">عملکرد کلی</p>
-                      <p className="text-2xl font-bold text-purple-600">85%</p>
-                    </div>
-                    <TrendingUp className="w-8 h-8 text-purple-500" />
-                  </div>
-                </CardContent>
-              </Card>
+              {statCards.map((stat, index) => {
+                const Icon = stat.icon;
+                return (
+                  <Card key={index}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                          <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                        </div>
+                        <Icon className={`w-8 h-8 ${stat.color.replace('text-', 'text-')}`} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
             {/* Quick Actions */}
-            <div className="grid lg:grid-cols-2 gap-8">
+            <div className="grid lg:grid-cols-2 gap-8 mb-8">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">دسترسی سریع</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <ArrowRight className="w-5 h-5" />
+                    دسترسی سریع
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-3">
-                    {getQuickActions(user?.role || "").map((action, index) => (
-                      <Link key={index} href={action.href}>
-                        <Button 
-                          variant="outline" 
-                          className="w-full justify-start gap-3 hover:bg-primary/5"
-                        >
-                          {action.icon}
-                          {action.label}
-                        </Button>
-                      </Link>
-                    ))}
+                  <div className="grid grid-cols-1 gap-4">
+                    {quickActions.map((action, index) => {
+                      const Icon = action.icon;
+                      return (
+                        <Link key={index} href={action.href}>
+                          <Button 
+                            variant="outline" 
+                            className="w-full justify-start gap-3 h-auto p-4"
+                          >
+                            <Icon className="w-5 h-5" />
+                            <div className="text-left">
+                              <div className="font-medium">{action.label}</div>
+                              <div className="text-xs text-gray-500">{action.description}</div>
+                            </div>
+                          </Button>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Recent Activity or Notifications */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">آخرین فعالیت‌ها</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bell className="w-5 h-5" />
+                    آخرین فعالیت‌ها
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">ورود به کلاس ریاضی</p>
-                        <p className="text-xs text-gray-500">30 دقیقه پیش</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">ارسال تکلیف فیزیک</p>
+                    <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                      <BookOpen className="w-5 h-5 text-blue-600 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">تکلیف جدید ریاضی</p>
                         <p className="text-xs text-gray-500">2 ساعت پیش</p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">دریافت پیام از معلم</p>
-                        <p className="text-xs text-gray-500">5 ساعت پیش</p>
+                    
+                    <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
+                      <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">حضور در کلاس فیزیک ثبت شد</p>
+                        <p className="text-xs text-gray-500">4 ساعت پیش</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg">
+                      <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">مهلت تحویل پروژه شیمی</p>
+                        <p className="text-xs text-gray-500">فردا</p>
                       </div>
                     </div>
                   </div>
@@ -236,26 +272,42 @@ export default function Home() {
               </Card>
             </div>
 
-            {/* Trial Info */}
-            {user?.isTrialActive && (
-              <Card className="mt-8 bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+            {/* Current Time and Schedule */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  برنامه امروز
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
+                    <Video className="w-6 h-6 text-blue-600" />
                     <div>
-                      <h3 className="text-lg font-semibold text-orange-800 mb-2">
-                        دوره آزمایشی 14 روزه
-                      </h3>
-                      <p className="text-orange-700">
-                        شما در حال استفاده از نسخه آزمایشی هستید. برای ادامه استفاده از تمام امکانات، لطفاً اشتراک خود را تمدید کنید.
-                      </p>
+                      <p className="font-medium">کلاس ریاضی</p>
+                      <p className="text-sm text-gray-500">10:00 - 11:30</p>
                     </div>
-                    <Button variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-200">
-                      مشاهده پلان‌ها
-                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                  
+                  <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
+                    <GraduationCap className="w-6 h-6 text-green-600" />
+                    <div>
+                      <p className="font-medium">آزمون فیزیک</p>
+                      <p className="text-sm text-gray-500">14:00 - 15:30</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg">
+                    <BookOpen className="w-6 h-6 text-purple-600" />
+                    <div>
+                      <p className="font-medium">مهلت تحویل انشا</p>
+                      <p className="text-sm text-gray-500">تا پایان روز</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </main>
       </div>
