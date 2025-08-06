@@ -23,6 +23,14 @@ import {
   Upload
 } from "lucide-react";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import { 
+  toPersianNumber, 
+  formatPersianDate, 
+  formatPersianTime, 
+  formatPersianPercentage,
+  formatPersianDuration,
+  formatPersianCount
+} from "@/lib/persian-utils";
 
 export default function Assignments() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -116,7 +124,7 @@ export default function Assignments() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen gradient-secondary">
       <Navbar />
       <div className="flex">
         <Sidebar />
@@ -124,20 +132,26 @@ export default function Assignments() {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <div className="space-y-2">
+                <h1 className="text-4xl font-bold text-gradient font-shabnam animate-float">
                   تکالیف
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground font-vazir text-lg">
                   مدیریت و مشاهده تکالیف درسی
                 </p>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  <span className="text-sm text-primary font-dana">
+                    سامانه مدیریت تکالیف هوشمند
+                  </span>
+                </div>
               </div>
               {(user?.role === 'teacher' || user?.role === 'principal') && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="gap-2">
-                      <Plus className="w-4 h-4" />
-                      ایجاد تکلیف جدید
+                    <Button className="gap-2 btn-gradient shadow-primary hover:shadow-xl">
+                      <Plus className="w-5 h-5" />
+                      <span className="font-dana">ایجاد تکلیف جدید</span>
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-md">
@@ -193,56 +207,64 @@ export default function Assignments() {
 
             {/* Stats Cards */}
             <div className="grid md:grid-cols-4 gap-6 mb-8">
-              <Card>
+              <Card className="card-gradient card-hover">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">کل تکالیف</p>
-                      <p className="text-2xl font-bold text-blue-600">{mockAssignments.length}</p>
+                      <p className="text-sm font-medium text-muted-foreground font-vazir">کل تکالیف</p>
+                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">{toPersianNumber(mockAssignments.length)}</p>
                     </div>
-                    <BookOpen className="w-8 h-8 text-blue-500" />
+                    <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-bounce-soft">
+                      <BookOpen className="w-7 h-7 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="card-gradient card-hover">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">در انتظار</p>
-                      <p className="text-2xl font-bold text-yellow-600">
-                        {mockAssignments.filter(a => a.status === 'pending').length}
+                      <p className="text-sm font-medium text-muted-foreground font-vazir">در انتظار</p>
+                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">
+                        {toPersianNumber(mockAssignments.filter(a => a.status === 'pending').length)}
                       </p>
                     </div>
-                    <Clock className="w-8 h-8 text-yellow-500" />
+                    <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-pulse">
+                      <Clock className="w-7 h-7 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="card-gradient card-hover">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">ارسال شده</p>
-                      <p className="text-2xl font-bold text-green-600">
-                        {mockAssignments.filter(a => a.status === 'submitted').length}
+                      <p className="text-sm font-medium text-muted-foreground font-vazir">ارسال شده</p>
+                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">
+                        {toPersianNumber(mockAssignments.filter(a => a.status === 'submitted').length)}
                       </p>
                     </div>
-                    <CheckCircle2 className="w-8 h-8 text-green-500" />
+                    <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-float">
+                      <CheckCircle2 className="w-7 h-7 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="card-gradient card-hover">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">دیرکرد</p>
-                      <p className="text-2xl font-bold text-red-600">
-                        {mockAssignments.filter(a => a.status === 'overdue').length}
+                      <p className="text-sm font-medium text-muted-foreground font-vazir">دیرکرد</p>
+                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">
+                        {toPersianNumber(mockAssignments.filter(a => a.status === 'overdue').length)}
                       </p>
                     </div>
-                    <AlertCircle className="w-8 h-8 text-red-500" />
+                    <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-bounce-soft">
+                      <AlertCircle className="w-7 h-7 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -250,41 +272,41 @@ export default function Assignments() {
 
             {/* Assignments List */}
             <Tabs defaultValue="all" className="space-y-6">
-              <TabsList>
-                <TabsTrigger value="all">همه تکالیف</TabsTrigger>
-                <TabsTrigger value="pending">در انتظار</TabsTrigger>
-                <TabsTrigger value="submitted">ارسال شده</TabsTrigger>
-                <TabsTrigger value="overdue">دیرکرد</TabsTrigger>
+              <TabsList className="glass backdrop-blur-md grid w-full grid-cols-4">
+                <TabsTrigger value="all" className="font-vazir">همه تکالیف</TabsTrigger>
+                <TabsTrigger value="pending" className="font-vazir">در انتظار</TabsTrigger>
+                <TabsTrigger value="submitted" className="font-vazir">ارسال شده</TabsTrigger>
+                <TabsTrigger value="overdue" className="font-vazir">دیرکرد</TabsTrigger>
               </TabsList>
 
               <TabsContent value="all" className="space-y-4">
                 {mockAssignments.map((assignment) => (
-                  <Card key={assignment.id}>
+                  <Card key={assignment.id} className="card-gradient card-hover border-primary/20">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold">{assignment.title}</h3>
+                            <h3 className="text-xl font-bold text-gradient font-shabnam">{assignment.title}</h3>
                             {getStatusBadge(assignment.status)}
                           </div>
-                          <p className="text-gray-600 mb-3">{assignment.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <div className="flex items-center gap-1">
-                              <BookOpen className="w-4 h-4" />
+                          <p className="text-muted-foreground mb-3 font-vazir">{assignment.description}</p>
+                          <div className="flex items-center gap-6 text-sm text-muted-foreground font-vazir">
+                            <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                              <BookOpen className="w-4 h-4 text-primary" />
                               {assignment.subject}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <User className="w-4 h-4" />
+                            <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                              <User className="w-4 h-4 text-primary" />
                               {assignment.teacherName}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              مهلت: {new Date(assignment.dueDate).toLocaleDateString('fa-IR')}
+                            <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                              <Calendar className="w-4 h-4 text-primary" />
+                              مهلت: {formatPersianDate(assignment.dueDate)}
                             </div>
                             {assignment.submittedAt && (
-                              <div className="flex items-center gap-1">
-                                <CheckCircle2 className="w-4 h-4" />
-                                ارسال: {new Date(assignment.submittedAt).toLocaleDateString('fa-IR')}
+                              <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                                <CheckCircle2 className="w-4 h-4 text-primary" />
+                                ارسال: {formatPersianDate(assignment.submittedAt)}
                               </div>
                             )}
                           </div>

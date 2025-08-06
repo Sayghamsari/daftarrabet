@@ -30,6 +30,14 @@ import {
   Eye
 } from "lucide-react";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import { 
+  toPersianNumber, 
+  formatPersianDate, 
+  formatPersianTime, 
+  formatPersianPercentage,
+  formatPersianDuration,
+  formatPersianCount
+} from "@/lib/persian-utils";
 
 export default function Examinations() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -138,7 +146,7 @@ export default function Examinations() {
     const config = statusConfig[status as keyof typeof statusConfig];
     
     return (
-      <Badge variant={config.variant} className="gap-1">
+      <Badge variant={config.variant} className="gap-1 font-dana">
         {status === 'in_progress' && <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>}
         {config.label}
       </Badge>
@@ -147,13 +155,13 @@ export default function Examinations() {
 
   const getScoreBadge = (score: number, passingScore: number) => {
     if (score >= passingScore + 20) {
-      return <Badge className="bg-green-500">عالی ({score})</Badge>;
+      return <Badge className="bg-green-500 font-dana">عالی ({toPersianNumber(score)})</Badge>;
     } else if (score >= passingScore + 10) {
-      return <Badge className="bg-blue-500">خوب ({score})</Badge>;
+      return <Badge className="bg-blue-500 font-dana">خوب ({toPersianNumber(score)})</Badge>;
     } else if (score >= passingScore) {
-      return <Badge className="bg-yellow-500">قبولی ({score})</Badge>;
+      return <Badge className="bg-yellow-500 font-dana">قبولی ({toPersianNumber(score)})</Badge>;
     } else {
-      return <Badge variant="destructive">مردود ({score})</Badge>;
+      return <Badge variant="destructive" className="font-dana">مردود ({toPersianNumber(score)})</Badge>;
     }
   };
 
@@ -339,7 +347,7 @@ export default function Examinations() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground font-vazir">کل آزمون‌ها</p>
-                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">{mockExams.length}</p>
+                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">{toPersianNumber(mockExams.length)}</p>
                     </div>
                     <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-bounce-soft">
                       <GraduationCap className="w-7 h-7 text-white" />
@@ -353,7 +361,7 @@ export default function Examinations() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground font-vazir">در حال برگزاری</p>
-                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">{inProgressExams.length}</p>
+                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">{toPersianNumber(inProgressExams.length)}</p>
                     </div>
                     <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-pulse">
                       <Play className="w-7 h-7 text-white" />
@@ -367,7 +375,7 @@ export default function Examinations() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground font-vazir">برنامه‌ریزی شده</p>
-                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">{scheduledExams.length}</p>
+                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">{toPersianNumber(scheduledExams.length)}</p>
                     </div>
                     <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-float">
                       <Calendar className="w-7 h-7 text-white" />
@@ -383,7 +391,7 @@ export default function Examinations() {
                       <p className="text-sm font-medium text-muted-foreground font-vazir">میانگین نمرات</p>
                       <p className="text-3xl font-bold text-gradient font-dana persian-nums">
                         {completedExams.filter(e => e.myScore).length > 0 
-                          ? Math.round(completedExams.filter(e => e.myScore).reduce((sum, e) => sum + (e.myScore || 0), 0) / completedExams.filter(e => e.myScore).length)
+                          ? toPersianNumber(Math.round(completedExams.filter(e => e.myScore).reduce((sum, e) => sum + (e.myScore || 0), 0) / completedExams.filter(e => e.myScore).length))
                           : "-"
                         }
                       </p>
@@ -417,28 +425,28 @@ export default function Examinations() {
                               {getStatusBadge(exam.status)}
                             </div>
                             <p className="text-muted-foreground mb-3 font-vazir">{exam.description}</p>
-                            <div className="flex items-center gap-6 text-sm text-muted-foreground mb-4 font-dana">
+                            <div className="flex items-center gap-6 text-sm text-muted-foreground mb-4 font-vazir">
                               <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
                                 <FileText className="w-4 h-4 text-primary" />
                                 {exam.subject}
                               </div>
                               <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
                                 <Clock className="w-4 h-4 text-primary" />
-                                {exam.duration} دقیقه
+                                {formatPersianDuration(exam.duration)}
                               </div>
                               <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
                                 <Target className="w-4 h-4 text-primary" />
-                                {exam.totalQuestions} سؤال
+                                {formatPersianCount(exam.totalQuestions, "سؤال")}
                               </div>
                               <div className="flex items-center gap-1">
                                 <Users className="w-4 h-4" />
-                                {exam.participants}/{exam.maxParticipants} شرکت‌کننده
+                                {toPersianNumber(exam.participants)}/{toPersianNumber(exam.maxParticipants)} شرکت‌کننده
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm">
+                            <div className="flex items-center gap-2 text-sm font-vazir">
                               <span>پیشرفت آزمون:</span>
                               <Progress value={65} className="w-32" />
-                              <span>65%</span>
+                              <span className="font-dana">{formatPersianPercentage(65)}</span>
                             </div>
                           </div>
                           <div className="flex gap-2">
@@ -483,27 +491,27 @@ export default function Examinations() {
                             {getStatusBadge(exam.status)}
                           </div>
                           <p className="text-muted-foreground mb-3 font-vazir">{exam.description}</p>
-                          <div className="flex items-center gap-6 text-sm text-muted-foreground font-dana">
+                          <div className="flex items-center gap-6 text-sm text-muted-foreground font-vazir">
                             <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
                               <FileText className="w-4 h-4 text-primary" />
                               {exam.subject}
                             </div>
                             <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
                               <Calendar className="w-4 h-4 text-primary" />
-                              {new Date(exam.date).toLocaleDateString('fa-IR')}
+                              {formatPersianDate(exam.date)}
                             </div>
                             <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
                               <Clock className="w-4 h-4 text-primary" />
-                              {exam.time} - {exam.duration} دقیقه
+                              {formatPersianTime(exam.time)} - {formatPersianDuration(exam.duration)}
                             </div>
                             <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
                               <Target className="w-4 h-4 text-primary" />
-                              {exam.totalQuestions} سؤال
+                              {formatPersianCount(exam.totalQuestions, "سؤال")}
                             </div>
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2 font-dana hover:bg-primary/10">
                             <Eye className="w-4 h-4" />
                             جزئیات
                           </Button>
@@ -517,37 +525,37 @@ export default function Examinations() {
               {/* Completed Exams */}
               <TabsContent value="completed" className="space-y-4">
                 {completedExams.map((exam) => (
-                  <Card key={exam.id} className="opacity-90">
+                  <Card key={exam.id} className="card-gradient card-hover border-green-200/50">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold">{exam.title}</h3>
+                            <h3 className="text-xl font-bold text-gradient font-shabnam">{exam.title}</h3>
                             {getStatusBadge(exam.status)}
                             {exam.myScore && getScoreBadge(exam.myScore, exam.passingScore)}
                           </div>
-                          <p className="text-gray-600 mb-3">{exam.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <div className="flex items-center gap-1">
-                              <FileText className="w-4 h-4" />
+                          <p className="text-muted-foreground mb-3 font-vazir">{exam.description}</p>
+                          <div className="flex items-center gap-6 text-sm text-muted-foreground font-vazir">
+                            <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                              <FileText className="w-4 h-4 text-primary" />
                               {exam.subject}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {new Date(exam.date).toLocaleDateString('fa-IR')}
+                            <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                              <Calendar className="w-4 h-4 text-primary" />
+                              {formatPersianDate(exam.date)}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Users className="w-4 h-4" />
-                              {exam.participants} شرکت‌کننده
+                            <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                              <Users className="w-4 h-4 text-primary" />
+                              {formatPersianCount(exam.participants, "شرکت‌کننده")}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Award className="w-4 h-4" />
-                              نمره قبولی: {exam.passingScore}
+                            <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                              <Award className="w-4 h-4 text-primary" />
+                              نمره قبولی: {toPersianNumber(exam.passingScore)}
                             </div>
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2 font-dana hover:bg-primary/10">
                             <BarChart3 className="w-4 h-4" />
                             نتایج
                           </Button>
@@ -561,9 +569,9 @@ export default function Examinations() {
               {/* Results Tab */}
               <TabsContent value="results" className="space-y-6">
                 <div className="grid lg:grid-cols-2 gap-6">
-                  <Card>
+                  <Card className="card-gradient">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className="flex items-center gap-2 text-gradient font-shabnam">
                         <BarChart3 className="w-5 h-5" />
                         آمار عملکرد
                       </CardTitle>
@@ -571,14 +579,14 @@ export default function Examinations() {
                     <CardContent>
                       <div className="space-y-4">
                         {completedExams.filter(e => e.myScore).map((exam) => (
-                          <div key={exam.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div key={exam.id} className="flex items-center justify-between p-4 glass rounded-lg backdrop-blur-sm">
                             <div>
-                              <p className="font-medium">{exam.subject}</p>
-                              <p className="text-sm text-gray-500">{exam.title}</p>
+                              <p className="font-semibold font-vazir">{exam.subject}</p>
+                              <p className="text-sm text-muted-foreground font-dana">{exam.title}</p>
                             </div>
                             <div className="text-left">
-                              <p className="font-bold text-lg">{exam.myScore}/100</p>
-                              <p className="text-xs text-gray-500">
+                              <p className="font-bold text-lg text-gradient font-dana">{toPersianNumber(exam.myScore || 0)}/۱۰۰</p>
+                              <p className="text-xs text-muted-foreground font-vazir">
                                 {exam.myScore && exam.myScore >= exam.passingScore ? "قبول" : "مردود"}
                               </p>
                             </div>
@@ -588,35 +596,35 @@ export default function Examinations() {
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="card-gradient">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className="flex items-center gap-2 text-gradient font-shabnam">
                         <Award className="w-5 h-5" />
                         وضعیت کلی
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        <div className="text-center p-6 bg-blue-50 rounded-lg">
-                          <div className="text-3xl font-bold text-blue-600 mb-2">
-                            {completedExams.filter(e => e.myScore).length}
+                        <div className="text-center p-6 gradient-primary rounded-xl glass backdrop-blur-sm">
+                          <div className="text-3xl font-bold text-white mb-2 font-dana">
+                            {toPersianNumber(completedExams.filter(e => e.myScore).length)}
                           </div>
-                          <p className="text-sm text-gray-600">آزمون‌های شرکت کرده</p>
+                          <p className="text-sm text-white/80 font-vazir">آزمون‌های شرکت کرده</p>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4">
-                          <div className="text-center p-4 bg-green-50 rounded-lg">
-                            <div className="text-xl font-bold text-green-600">
-                              {completedExams.filter(e => e.myScore && e.myScore >= e.passingScore).length}
+                          <div className="text-center p-4 bg-green-500/10 rounded-xl border border-green-200/30">
+                            <div className="text-xl font-bold text-green-600 font-dana">
+                              {toPersianNumber(completedExams.filter(e => e.myScore && e.myScore >= e.passingScore).length)}
                             </div>
-                            <p className="text-xs text-gray-600">قبولی</p>
+                            <p className="text-xs text-green-600 font-vazir">قبولی</p>
                           </div>
                           
-                          <div className="text-center p-4 bg-red-50 rounded-lg">
-                            <div className="text-xl font-bold text-red-600">
-                              {completedExams.filter(e => e.myScore && e.myScore < e.passingScore).length}
+                          <div className="text-center p-4 bg-red-500/10 rounded-xl border border-red-200/30">
+                            <div className="text-xl font-bold text-red-600 font-dana">
+                              {toPersianNumber(completedExams.filter(e => e.myScore && e.myScore < e.passingScore).length)}
                             </div>
-                            <p className="text-xs text-gray-600">مردودی</p>
+                            <p className="text-xs text-red-600 font-vazir">مردودی</p>
                           </div>
                         </div>
                       </div>
