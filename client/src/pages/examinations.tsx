@@ -195,7 +195,7 @@ export default function Examinations() {
   const completedExams = mockExams.filter(e => e.status === 'completed');
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen gradient-secondary">
       <Navbar />
       <div className="flex">
         <Sidebar />
@@ -203,20 +203,26 @@ export default function Examinations() {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <div className="space-y-2">
+                <h1 className="text-4xl font-bold text-gradient font-shabnam animate-float">
                   آزمون‌ها
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground font-vazir text-lg">
                   مدیریت و شرکت در آزمون‌های درسی
                 </p>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  <span className="text-sm text-primary font-dana">
+                    سامانه آزمون‌گیری هوشمند
+                  </span>
+                </div>
               </div>
               {(user?.role === 'teacher' || user?.role === 'principal') && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="gap-2">
-                      <Plus className="w-4 h-4" />
-                      ایجاد آزمون جدید
+                    <Button className="gap-2 btn-gradient shadow-primary hover:shadow-xl">
+                      <Plus className="w-5 h-5" />
+                      <span className="font-dana">ایجاد آزمون جدید</span>
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
@@ -328,92 +334,100 @@ export default function Examinations() {
 
             {/* Stats Cards */}
             <div className="grid md:grid-cols-4 gap-6 mb-8">
-              <Card>
+              <Card className="card-gradient card-hover">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">کل آزمون‌ها</p>
-                      <p className="text-2xl font-bold text-blue-600">{mockExams.length}</p>
+                      <p className="text-sm font-medium text-muted-foreground font-vazir">کل آزمون‌ها</p>
+                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">{mockExams.length}</p>
                     </div>
-                    <GraduationCap className="w-8 h-8 text-blue-500" />
+                    <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-bounce-soft">
+                      <GraduationCap className="w-7 h-7 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="card-gradient card-hover">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">در حال برگزاری</p>
-                      <p className="text-2xl font-bold text-orange-600">{inProgressExams.length}</p>
+                      <p className="text-sm font-medium text-muted-foreground font-vazir">در حال برگزاری</p>
+                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">{inProgressExams.length}</p>
                     </div>
-                    <Play className="w-8 h-8 text-orange-500" />
+                    <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-pulse">
+                      <Play className="w-7 h-7 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="card-gradient card-hover">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">برنامه‌ریزی شده</p>
-                      <p className="text-2xl font-bold text-purple-600">{scheduledExams.length}</p>
+                      <p className="text-sm font-medium text-muted-foreground font-vazir">برنامه‌ریزی شده</p>
+                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">{scheduledExams.length}</p>
                     </div>
-                    <Calendar className="w-8 h-8 text-purple-500" />
+                    <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-float">
+                      <Calendar className="w-7 h-7 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="card-gradient card-hover">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">میانگین نمرات</p>
-                      <p className="text-2xl font-bold text-green-600">
+                      <p className="text-sm font-medium text-muted-foreground font-vazir">میانگین نمرات</p>
+                      <p className="text-3xl font-bold text-gradient font-dana persian-nums">
                         {completedExams.filter(e => e.myScore).length > 0 
                           ? Math.round(completedExams.filter(e => e.myScore).reduce((sum, e) => sum + (e.myScore || 0), 0) / completedExams.filter(e => e.myScore).length)
                           : "-"
                         }
                       </p>
                     </div>
-                    <Award className="w-8 h-8 text-green-500" />
+                    <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-bounce-soft">
+                      <Award className="w-7 h-7 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
             <Tabs defaultValue="in_progress" className="space-y-6">
-              <TabsList>
-                <TabsTrigger value="in_progress">در حال برگزاری</TabsTrigger>
-                <TabsTrigger value="scheduled">برنامه‌ریزی شده</TabsTrigger>
-                <TabsTrigger value="completed">تمام شده</TabsTrigger>
-                <TabsTrigger value="results">نتایج</TabsTrigger>
+              <TabsList className="glass backdrop-blur-md grid w-full grid-cols-4">
+                <TabsTrigger value="in_progress" className="font-vazir">در حال برگزاری</TabsTrigger>
+                <TabsTrigger value="scheduled" className="font-vazir">برنامه‌ریزی شده</TabsTrigger>
+                <TabsTrigger value="completed" className="font-vazir">تمام شده</TabsTrigger>
+                <TabsTrigger value="results" className="font-vazir">نتایج</TabsTrigger>
               </TabsList>
 
               {/* In Progress Exams */}
               <TabsContent value="in_progress" className="space-y-4">
                 {inProgressExams.length > 0 ? (
                   inProgressExams.map((exam) => (
-                    <Card key={exam.id} className="border-orange-200 bg-orange-50">
+                    <Card key={exam.id} className="card-gradient card-hover border-primary/20">
                       <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-lg font-semibold">{exam.title}</h3>
+                              <h3 className="text-xl font-bold text-gradient font-shabnam">{exam.title}</h3>
                               {getStatusBadge(exam.status)}
                             </div>
-                            <p className="text-gray-600 mb-3">{exam.description}</p>
-                            <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                              <div className="flex items-center gap-1">
-                                <FileText className="w-4 h-4" />
+                            <p className="text-muted-foreground mb-3 font-vazir">{exam.description}</p>
+                            <div className="flex items-center gap-6 text-sm text-muted-foreground mb-4 font-dana">
+                              <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                                <FileText className="w-4 h-4 text-primary" />
                                 {exam.subject}
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
+                              <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                                <Clock className="w-4 h-4 text-primary" />
                                 {exam.duration} دقیقه
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Target className="w-4 h-4" />
+                              <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                                <Target className="w-4 h-4 text-primary" />
                                 {exam.totalQuestions} سؤال
                               </div>
                               <div className="flex items-center gap-1">
@@ -430,9 +444,9 @@ export default function Examinations() {
                           <div className="flex gap-2">
                             <Button 
                               onClick={() => handleStartExam(exam)}
-                              className="gap-2 bg-orange-600 hover:bg-orange-700"
+                              className="btn-gradient shadow-primary gap-3 font-dana"
                             >
-                              <Play className="w-4 h-4" />
+                              <Play className="w-5 h-5" />
                               شرکت در آزمون
                             </Button>
                           </div>
@@ -441,13 +455,15 @@ export default function Examinations() {
                     </Card>
                   ))
                 ) : (
-                  <Card>
+                  <Card className="card-gradient">
                     <CardContent className="p-12 text-center">
-                      <Play className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                      <h3 className="text-lg font-semibold text-gray-500 mb-2">
+                      <div className="w-20 h-20 mx-auto mb-6 gradient-primary rounded-full flex items-center justify-center">
+                        <Play className="w-10 h-10 text-white" />
+                      </div>
+                      <h3 className="text-xl font-bold text-gradient mb-3 font-shabnam">
                         هیچ آزمونی در حال برگزاری نیست
                       </h3>
-                      <p className="text-gray-400">
+                      <p className="text-muted-foreground font-vazir">
                         آزمون‌های برنامه‌ریزی شده را در تب بعدی مشاهده کنید
                       </p>
                     </CardContent>
@@ -458,30 +474,30 @@ export default function Examinations() {
               {/* Scheduled Exams */}
               <TabsContent value="scheduled" className="space-y-4">
                 {scheduledExams.map((exam) => (
-                  <Card key={exam.id}>
+                  <Card key={exam.id} className="card-gradient card-hover border-primary/20">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold">{exam.title}</h3>
+                            <h3 className="text-xl font-bold text-gradient font-shabnam">{exam.title}</h3>
                             {getStatusBadge(exam.status)}
                           </div>
-                          <p className="text-gray-600 mb-3">{exam.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <div className="flex items-center gap-1">
-                              <FileText className="w-4 h-4" />
+                          <p className="text-muted-foreground mb-3 font-vazir">{exam.description}</p>
+                          <div className="flex items-center gap-6 text-sm text-muted-foreground font-dana">
+                            <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                              <FileText className="w-4 h-4 text-primary" />
                               {exam.subject}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
+                            <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                              <Calendar className="w-4 h-4 text-primary" />
                               {new Date(exam.date).toLocaleDateString('fa-IR')}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
+                            <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                              <Clock className="w-4 h-4 text-primary" />
                               {exam.time} - {exam.duration} دقیقه
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Target className="w-4 h-4" />
+                            <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-full">
+                              <Target className="w-4 h-4 text-primary" />
                               {exam.totalQuestions} سؤال
                             </div>
                           </div>
