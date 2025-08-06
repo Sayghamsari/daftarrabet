@@ -150,6 +150,17 @@ export default function AuthPage() {
                 {authStep === "verify" && "کد ارسال شده را وارد کنید"}
                 {authStep === "complete" && "اطلاعات خود را تکمیل کنید"}
               </CardDescription>
+              
+              {authStep === "login" && (
+                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm">
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">حساب‌های آزمایشی:</h3>
+                  <div className="space-y-1 text-blue-700 dark:text-blue-300 text-xs">
+                    <div><strong>دانش‌آموز علی احمدی:</strong> کد ملی: 1234567890، رمز: 6789</div>
+                    <div><strong>معلم فاطمه کریمی:</strong> کد ملی: 2345678901، رمز: 8901</div>
+                    <div><strong>مدیر محمد رضایی:</strong> کد ملی: 3456789012، رمز: 9012</div>
+                  </div>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               {authStep === "login" && (
