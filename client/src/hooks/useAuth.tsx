@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext } from "react";
-import { useQuery, useMutation, UseMutationResult } from "@tanstack/react-query";
-import { User, LoginData, RegisterData, VerifyPhoneData, CompleteProfileData } from "@shared/schema";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import type { User, LoginData, RegisterData, VerifyPhoneData, CompleteProfileData } from "@shared/schema";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -9,19 +9,19 @@ interface AuthContextData {
   isLoading: boolean;
   error: Error | null;
   isAuthenticated: boolean;
-  loginMutation: UseMutationResult<User, Error, LoginData>;
-  logoutMutation: UseMutationResult<void, Error, void>;
-  sendVerificationMutation: UseMutationResult<{ success: boolean }, Error, RegisterData>;
-  verifyPhoneMutation: UseMutationResult<{ success: boolean }, Error, VerifyPhoneData>;
-  completeProfileMutation: UseMutationResult<{ user: User }, Error, CompleteProfileData>;
+  loginMutation: any;
+  logoutMutation: any;
+  sendVerificationMutation: any;
+  verifyPhoneMutation: any;
+  completeProfileMutation: any;
 }
 
 export const AuthContext = createContext<AuthContextData | null>(null);
 
-export function AuthProvider(props: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   
-  const { data: user, error, isLoading } = useQuery<User | undefined, Error>({
+  const { data: user, error, isLoading } = useQuery({
     queryKey: ["/api/auth/user"],
     retry: false,
   });
@@ -105,7 +105,11 @@ export function AuthProvider(props: { children: ReactNode }) {
     completeProfileMutation,
   };
 
-  return AuthContext.Provider({ value: authData, children: props.children });
+  return (
+    <AuthContext.Provider value={authData}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

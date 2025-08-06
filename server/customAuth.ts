@@ -6,12 +6,28 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { smsService } from "./smsService";
-import { User, LoginData, RegisterData, VerifyPhoneData, CompleteProfileData } from "@shared/schema";
+import type { User, LoginData, RegisterData, VerifyPhoneData, CompleteProfileData } from "@shared/schema";
 import ConnectPgSimple from "connect-pg-simple";
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    interface User {
+      id: string;
+      nationalId: string;
+      phoneNumber: string;
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      role: string;
+      schoolId?: string;
+      isActive: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+    }
+    interface Session {
+      tempPhoneNumber?: string;
+      phoneVerified?: boolean;
+    }
   }
 }
 
@@ -39,7 +55,8 @@ export function setupCustomAuth(app: Express) {
     saveUninitialized: false,
     store: new PostgresSessionStore({
       conString: process.env.DATABASE_URL,
-      createTableIfMissing: false,
+      createTableIfMissing: true,
+      tableName: 'session',
     }),
     cookie: {
       httpOnly: true,
