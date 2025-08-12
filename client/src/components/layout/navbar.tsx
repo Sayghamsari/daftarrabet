@@ -37,8 +37,8 @@ export default function Navbar() {
     return roleMap[role as keyof typeof roleMap] || role;
   };
 
-  const getRoleBadgeVariant = (role: string) => {
-    const variantMap = {
+  const getRoleBadgeVariant = (role: string): "default" | "secondary" | "destructive" | "outline" => {
+    const variantMap: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       student: "default",
       teacher: "secondary",
       principal: "destructive",
@@ -47,7 +47,7 @@ export default function Navbar() {
       deputy: "default",
       liaison: "outline"
     };
-    return variantMap[role as keyof typeof variantMap] || "default";
+    return variantMap[role] || "default";
   };
 
   return (

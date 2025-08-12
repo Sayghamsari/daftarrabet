@@ -90,24 +90,24 @@ export default function Sidebar() {
   const menuItems = getMenuItems(user?.role || "student");
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 h-screen">
+    <div className="w-64 glass border-r border-primary/20 h-screen backdrop-blur-md">
       <ScrollArea className="h-full">
         <div className="p-6">
           <div className="space-y-6">
             {/* User Info */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-lg font-bold text-primary">
+              <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-3 animate-bounce-soft">
+                <span className="text-lg font-bold text-white font-dana">
                   {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                 </span>
               </div>
-              <h3 className="font-semibold text-gray-900">
+              <h3 className="font-semibold text-gradient font-shabnam">
                 {user?.firstName} {user?.lastName}
               </h3>
-              <p className="text-sm text-gray-500">{user?.email}</p>
+              <p className="text-sm text-muted-foreground font-vazir">{user?.email}</p>
               {user?.isTrialActive && (
-                <Badge variant="outline" className="mt-2 text-xs">
-                  دوره آزمایشی
+                <Badge variant="outline" className="mt-2 text-xs font-dana bg-primary/10 text-primary border-primary/30">
+                  دوره آزمایشی ۱۴ روزه
                 </Badge>
               )}
             </div>
@@ -125,11 +125,16 @@ export default function Sidebar() {
                     <Button
                       variant={isActive ? "default" : "ghost"}
                       className={cn(
-                        "w-full justify-start gap-3",
-                        isActive && "bg-primary text-primary-foreground"
+                        "w-full justify-start gap-3 font-vazir card-hover",
+                        isActive ? "btn-gradient text-white shadow-primary" : "hover:bg-primary/10 text-muted-foreground"
                       )}
                     >
-                      <Icon className="w-5 h-5" />
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center",
+                        isActive ? "bg-white/20" : "bg-primary/10"
+                      )}>
+                        <Icon className="w-5 h-5" />
+                      </div>
                       {item.label}
                     </Button>
                   </Link>
@@ -141,12 +146,16 @@ export default function Sidebar() {
 
             {/* Bottom Actions */}
             <div className="space-y-2">
-              <Button variant="ghost" className="w-full justify-start gap-3">
-                <Settings className="w-5 h-5" />
+              <Button variant="ghost" className="w-full justify-start gap-3 font-vazir hover:bg-primary/10 text-muted-foreground">
+                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <Settings className="w-5 h-5" />
+                </div>
                 تنظیمات
               </Button>
-              <Button variant="ghost" className="w-full justify-start gap-3">
-                <HelpCircle className="w-5 h-5" />
+              <Button variant="ghost" className="w-full justify-start gap-3 font-vazir hover:bg-primary/10 text-muted-foreground">
+                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
                 راهنما
               </Button>
             </div>

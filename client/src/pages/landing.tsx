@@ -26,30 +26,38 @@ import {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen gradient-secondary">
       {/* Navigation Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="glass backdrop-blur-md border-b border-primary/20 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <nav className="flex items-center justify-between">
             <div className="flex items-center space-x-reverse space-x-4">
-              <div className="bg-primary p-2 rounded-lg">
-                <GraduationCap className="text-white text-xl w-6 h-6" />
+              <div className="gradient-primary p-2 rounded-xl animate-bounce-soft">
+                <GraduationCap className="text-white text-xl w-7 h-7" />
               </div>
               <div>
-                <h1 className="text-xl font-shabnam font-bold text-primary">دفتر رابط - پلتفرم مدیریت هوشمند آموزش</h1>
-                <p className="text-sm font-dana text-gray-600">سیستم جامع مدرسه‌ای با قدرت هوش مصنوعی</p>
+                <h1 className="text-xl font-shabnam font-bold text-gradient">دفتر رابط - پلتفرم مدیریت هوشمند آموزش</h1>
+                <p className="text-sm font-dana text-muted-foreground">سیستم جامع مدرسه‌ای با قدرت هوش مصنوعی</p>
               </div>
             </div>
             <div className="flex items-center space-x-reverse space-x-4">
-              <Button variant="ghost" className="font-sahel text-gray-600 hover:text-primary">
+              <Button 
+                variant="ghost" 
+                className="font-vazir text-muted-foreground hover:text-primary hover:bg-primary/10"
+                onClick={() => window.location.href = '/about'}
+              >
                 درباره ما
               </Button>
-              <Button variant="ghost" className="font-sahel text-gray-600 hover:text-primary">
+              <Button 
+                variant="ghost" 
+                className="font-vazir text-muted-foreground hover:text-primary hover:bg-primary/10"
+                onClick={() => window.location.href = '/contact'}
+              >
                 تماس با ما
               </Button>
               <Button 
                 onClick={() => window.location.href = '/auth'}
-                className="font-sahel bg-primary text-white hover:bg-primary/90"
+                className="font-dana btn-gradient shadow-primary hover:shadow-xl"
               >
                 ورود به سیستم
               </Button>
@@ -59,20 +67,21 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary/5 to-white py-16">
-        <div className="container mx-auto px-4">
+      <section className="gradient-primary py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-shabnam font-bold text-primary mb-6 leading-tight">
+            <h2 className="text-5xl md:text-6xl font-shabnam font-bold text-white mb-6 leading-tight animate-float">
               مدیریت هوشمند آموزش با قدرت هوش مصنوعی
             </h2>
-            <p className="text-xl font-dana text-gray-600 mb-8 leading-relaxed">
+            <p className="text-xl font-vazir text-white/90 mb-8 leading-relaxed">
               پلتفرمی جامع برای مدیریت فرایندهای آموزشی، ارتقاء ارتباطات مدرسه‌ای و پشتیبانی از دانش‌آموزان، معلمان و اولیا با تحلیل‌های هوشمند
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 
                 size="lg"
                 onClick={() => window.location.href = '/auth'}
-                className="bg-secondary text-white hover:bg-secondary/90 px-8 py-4 text-lg"
+                className="bg-white text-primary hover:bg-white/90 px-8 py-4 text-lg font-dana shadow-xl hover:shadow-2xl"
               >
                 <Rocket className="ml-2 w-5 h-5" />
                 شروع آزمایشی ۱۴ روزه رایگان
@@ -80,23 +89,23 @@ export default function Landing() {
               <Button 
                 variant="outline" 
                 size="lg"
-                className="border-primary text-primary hover:bg-primary/5 px-8 py-4 text-lg"
+                className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 text-lg font-dana"
               >
                 <Play className="ml-2 w-5 h-5" />
                 مشاهده ویدئو معرفی
               </Button>
             </div>
-            <div className="mt-8 flex justify-center items-center space-x-reverse space-x-8 text-sm text-gray-500">
-              <div className="flex items-center">
-                <Check className="text-secondary ml-2 w-4 h-4" />
+            <div className="mt-8 flex justify-center items-center space-x-reverse space-x-8 text-sm text-white/80">
+              <div className="flex items-center font-vazir">
+                <Check className="text-white ml-2 w-4 h-4" />
                 بدون نیاز به کارت اعتباری
               </div>
-              <div className="flex items-center">
-                <Check className="text-secondary ml-2 w-4 h-4" />
+              <div className="flex items-center font-vazir">
+                <Check className="text-white ml-2 w-4 h-4" />
                 پشتیبانی ۲۴/۷
               </div>
-              <div className="flex items-center">
-                <Check className="text-secondary ml-2 w-4 h-4" />
+              <div className="flex items-center font-vazir">
+                <Check className="text-white ml-2 w-4 h-4" />
                 امکان لغو هر زمان
               </div>
             </div>

@@ -7,6 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
+  toPersianNumber, 
+  formatPersianDate, 
+  formatPersianTime, 
+  formatPersianPercentage,
+  formatPersianDuration,
+  formatPersianCount
+} from "@/lib/persian-utils";
+import { 
   BarChart3, 
   BookOpen, 
   Calendar, 
@@ -149,7 +157,7 @@ export default function Home() {
   const statCards = getStatCards(user?.role || "student");
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen gradient-secondary">
       <Navbar />
       <div className="flex">
         <Sidebar />
@@ -158,23 +166,29 @@ export default function Home() {
             {/* Welcome Section */}
             <div className="mb-8">
               <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <div className="space-y-3">
+                  <h1 className="text-4xl font-bold text-gradient font-shabnam animate-float">
                     خوش آمدید، {user?.firstName} {user?.lastName}
                   </h1>
-                  <div className="flex items-center gap-2">
-                    <p className="text-gray-600">
+                  <div className="flex items-center gap-3">
+                    <p className="text-muted-foreground font-vazir text-lg">
                       {getRoleLabel(user?.role || "")}
                     </p>
                     {user?.isTrialActive && (
-                      <Badge variant="outline" className="text-xs">
-                        دوره آزمایشی
+                      <Badge variant="outline" className="text-xs font-dana bg-primary/10 text-primary border-primary/30">
+                        دوره آزمایشی ۱۴ روزه
                       </Badge>
                     )}
                   </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                    <span className="text-sm text-primary font-dana">
+                      داشبورد {getRoleLabel(user?.role || "")}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" size="sm" className="gap-2 font-dana hover:bg-primary/10">
                     <Bell className="w-4 h-4" />
                     اعلان‌ها
                   </Button>
@@ -187,14 +201,21 @@ export default function Home() {
               {statCards.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
-                  <Card key={index}>
+                  <Card key={index} className="card-gradient card-hover">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                          <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                          <p className="text-sm font-medium text-muted-foreground font-vazir">{stat.label}</p>
+                          <p className={`text-3xl font-bold text-gradient font-dana persian-nums`}>
+                            {typeof stat.value === 'string' && stat.value.includes('%') 
+                              ? formatPersianPercentage(parseInt(stat.value))
+                              : toPersianNumber(stat.value)
+                            }
+                          </p>
                         </div>
-                        <Icon className={`w-8 h-8 ${stat.color.replace('text-', 'text-')}`} />
+                        <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center animate-bounce-soft">
+                          <Icon className="w-7 h-7 text-white" />
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -204,9 +225,9 @@ export default function Home() {
 
             {/* Quick Actions */}
             <div className="grid lg:grid-cols-2 gap-8 mb-8">
-              <Card>
+              <Card className="card-gradient">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-gradient font-shabnam">
                     <ArrowRight className="w-5 h-5" />
                     دسترسی سریع
                   </CardTitle>
@@ -219,12 +240,14 @@ export default function Home() {
                         <Link key={index} href={action.href}>
                           <Button 
                             variant="outline" 
-                            className="w-full justify-start gap-3 h-auto p-4"
+                            className="w-full justify-start gap-3 h-auto p-4 hover:bg-primary/10 border-primary/20 font-vazir"
                           >
-                            <Icon className="w-5 h-5" />
-                            <div className="text-left">
-                              <div className="font-medium">{action.label}</div>
-                              <div className="text-xs text-gray-500">{action.description}</div>
+                            <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center">
+                              <Icon className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="text-right flex-1">
+                              <div className="font-semibold font-dana">{action.label}</div>
+                              <div className="text-xs text-muted-foreground font-vazir">{action.description}</div>
                             </div>
                           </Button>
                         </Link>
@@ -235,36 +258,42 @@ export default function Home() {
               </Card>
 
               {/* Recent Activity or Notifications */}
-              <Card>
+              <Card className="card-gradient">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-gradient font-shabnam">
                     <Bell className="w-5 h-5" />
                     آخرین فعالیت‌ها
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-                      <BookOpen className="w-5 h-5 text-blue-600 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">تکلیف جدید ریاضی</p>
-                        <p className="text-xs text-gray-500">2 ساعت پیش</p>
+                    <div className="flex items-start gap-3 p-4 glass rounded-xl backdrop-blur-sm border border-primary/20">
+                      <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <BookOpen className="w-5 h-5 text-blue-600 mt-0.5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold font-vazir">تکلیف جدید ریاضی</p>
+                        <p className="text-xs text-muted-foreground font-dana">{toPersianNumber(2)} ساعت پیش</p>
                       </div>
                     </div>
                     
-                    <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
-                      <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">حضور در کلاس فیزیک ثبت شد</p>
-                        <p className="text-xs text-gray-500">4 ساعت پیش</p>
+                    <div className="flex items-start gap-3 p-4 glass rounded-xl backdrop-blur-sm border border-green-200/30">
+                      <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold font-vazir">حضور در کلاس فیزیک ثبت شد</p>
+                        <p className="text-xs text-muted-foreground font-dana">{toPersianNumber(4)} ساعت پیش</p>
                       </div>
                     </div>
                     
-                    <div className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg">
-                      <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">مهلت تحویل پروژه شیمی</p>
-                        <p className="text-xs text-gray-500">فردا</p>
+                    <div className="flex items-start gap-3 p-4 glass rounded-xl backdrop-blur-sm border border-orange-200/30">
+                      <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                        <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold font-vazir">مهلت تحویل پروژه شیمی</p>
+                        <p className="text-xs text-muted-foreground font-dana">فردا</p>
                       </div>
                     </div>
                   </div>
@@ -273,36 +302,42 @@ export default function Home() {
             </div>
 
             {/* Current Time and Schedule */}
-            <Card>
+            <Card className="card-gradient">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-gradient font-shabnam">
                   <Calendar className="w-5 h-5" />
                   برنامه امروز
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-3 gap-4">
-                  <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
-                    <Video className="w-6 h-6 text-blue-600" />
+                  <div className="flex items-center gap-3 p-4 glass rounded-xl backdrop-blur-sm border border-blue-200/30">
+                    <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                      <Video className="w-6 h-6 text-blue-600" />
+                    </div>
                     <div>
-                      <p className="font-medium">کلاس ریاضی</p>
-                      <p className="text-sm text-gray-500">10:00 - 11:30</p>
+                      <p className="font-semibold font-vazir">کلاس ریاضی</p>
+                      <p className="text-sm text-muted-foreground font-dana">{formatPersianTime("10:00")} - {formatPersianTime("11:30")}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
-                    <GraduationCap className="w-6 h-6 text-green-600" />
+                  <div className="flex items-center gap-3 p-4 glass rounded-xl backdrop-blur-sm border border-green-200/30">
+                    <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                      <GraduationCap className="w-6 h-6 text-green-600" />
+                    </div>
                     <div>
-                      <p className="font-medium">آزمون فیزیک</p>
-                      <p className="text-sm text-gray-500">14:00 - 15:30</p>
+                      <p className="font-semibold font-vazir">آزمون فیزیک</p>
+                      <p className="text-sm text-muted-foreground font-dana">{formatPersianTime("14:00")} - {formatPersianTime("15:30")}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg">
-                    <BookOpen className="w-6 h-6 text-purple-600" />
+                  <div className="flex items-center gap-3 p-4 glass rounded-xl backdrop-blur-sm border border-purple-200/30">
+                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                      <BookOpen className="w-6 h-6 text-purple-600" />
+                    </div>
                     <div>
-                      <p className="font-medium">مهلت تحویل انشا</p>
-                      <p className="text-sm text-gray-500">تا پایان روز</p>
+                      <p className="font-semibold font-vazir">مهلت تحویل انشا</p>
+                      <p className="text-sm text-muted-foreground font-dana">تا پایان روز</p>
                     </div>
                   </div>
                 </div>
