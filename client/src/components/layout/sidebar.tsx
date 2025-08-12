@@ -19,7 +19,10 @@ import {
   Brain,
   ClipboardList,
   UserCheck,
-  School
+  School,
+  Smartphone,
+  TrendingUp,
+  PlusCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,24 +53,32 @@ export default function Sidebar() {
         { label: "بانک سؤال", href: "/question-bank", icon: GraduationCap },
         { label: "آزمون‌ها", href: "/examinations", icon: ClipboardList },
         { label: "کلاس آنلاین", href: "/online-classroom", icon: Video },
+        { label: "مدیریت نمرات", href: "/grade-dashboard", icon: TrendingUp },
+        { label: "سازنده آزمون", href: "/exam-builder-dashboard", icon: PlusCircle },
+        { label: "پیام‌رسانی SMS", href: "/sms-dashboard", icon: Smartphone },
       ],
       counselor: [
         ...commonItems,
         { label: "داشبورد", href: "/dashboard/counselor", icon: BarChart3 },
         { label: "جلسات مشاوره", href: "/dashboard/counselor", icon: MessageSquare },
         { label: "تحلیل عملکرد", href: "/dashboard/counselor", icon: Brain },
+        { label: "پیام‌رسانی SMS", href: "/sms-dashboard", icon: Smartphone },
       ],
       educational_deputy: [
         ...commonItems,
         { label: "داشبورد تحلیلی", href: "/dashboard/educational-deputy", icon: BarChart3 },
         { label: "نظارت بر کلاس‌ها", href: "/dashboard/educational-deputy", icon: Users },
         { label: "گزارش‌گیری", href: "/dashboard/educational-deputy", icon: FileText },
+        { label: "مدیریت نمرات", href: "/grade-dashboard", icon: TrendingUp },
+        { label: "سازنده آزمون", href: "/exam-builder-dashboard", icon: PlusCircle },
+        { label: "پیام‌رسانی SMS", href: "/sms-dashboard", icon: Smartphone },
       ],
       liaison_office: [
         ...commonItems,
         { label: "داشبورد", href: "/dashboard/liaison-office", icon: BarChart3 },
         { label: "مدیریت رویدادها", href: "/dashboard/liaison-office", icon: Calendar },
         { label: "ثبت‌نام جدید", href: "/dashboard/liaison-office", icon: Users },
+        { label: "پیام‌رسانی SMS", href: "/sms-dashboard", icon: Smartphone },
       ],
       parent: [
         ...commonItems,

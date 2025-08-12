@@ -22,6 +22,9 @@ import Attendance from "@/pages/attendance";
 import OnlineClassroom from "@/pages/online-classroom";
 import QuestionBank from "@/pages/question-bank";
 import Examinations from "@/pages/examinations";
+import SMSDashboard from "@/pages/sms-dashboard";
+import GradeDashboard from "@/pages/grade-dashboard";
+import ExamBuilderDashboard from "@/pages/exam-builder-dashboard";
 import LoadingSpinner from "@/components/common/loading-spinner";
 
 function Router() {
@@ -58,6 +61,9 @@ function Router() {
           <Route path="/online-classroom" component={OnlineClassroom} />
           <Route path="/question-bank" component={QuestionBank} />
           <Route path="/examinations" component={Examinations} />
+          <Route path="/sms-dashboard" component={SMSDashboard} />
+          <Route path="/grade-dashboard" component={GradeDashboard} />
+          <Route path="/exam-builder-dashboard" component={ExamBuilderDashboard} />
         </>
       )}
       <Route component={NotFound} />

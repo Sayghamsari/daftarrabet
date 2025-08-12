@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   LoginData, 
@@ -18,7 +19,7 @@ import {
   verifyPhoneSchema, 
   completeProfileSchema 
 } from "@shared/schema";
-import { BookOpen, GraduationCap, Phone, Smartphone, User } from "lucide-react";
+import { BookOpen, GraduationCap, Phone, Smartphone, User, Palette } from "lucide-react";
 
 type AuthStep = "login" | "register" | "verify" | "complete";
 
@@ -138,7 +139,16 @@ export default function AuthPage() {
         <div className="flex items-center justify-center">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl">
+              {authStep === "login" && (
+                <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Palette className="w-4 h-4 text-primary" />
+                    <span className="font-vazir text-sm">انتخاب تم رنگی:</span>
+                  </div>
+                  <ThemeSwitcher />
+                </div>
+              )}
+              <CardTitle className="text-2xl font-shabnam">
                 {authStep === "login" && "ورود به سیستم"}
                 {authStep === "register" && "ثبت‌نام"}
                 {authStep === "verify" && "تایید شماره تلفن"}

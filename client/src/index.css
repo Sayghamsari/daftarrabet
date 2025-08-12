@@ -8,79 +8,132 @@
 @tailwind utilities;
 
 :root {
-  /* Default (Feminine) Theme */
-  --background: hsl(350, 100%, 99%);
-  --foreground: hsl(340, 15%, 15%);
-  --muted: hsl(340, 20%, 96%);
-  --muted-foreground: hsl(340, 15%, 46%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(340, 15%, 15%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(340, 15%, 15%);
-  --border: hsl(340, 20%, 92%);
-  --input: hsl(340, 20%, 92%);
-  --primary: hsl(340, 82%, 52%);
+  /* Default (Feminine) Theme - Soft Purple */
+  --background: hsl(315, 40%, 98%);
+  --foreground: hsl(270, 15%, 15%);
+  --muted: hsl(315, 25%, 95%);
+  --muted-foreground: hsl(270, 10%, 45%);
+  --popover: hsl(315, 50%, 99%);
+  --popover-foreground: hsl(270, 15%, 15%);
+  --card: hsl(315, 50%, 99%);
+  --card-foreground: hsl(270, 15%, 15%);
+  --border: hsl(315, 20%, 90%);
+  --input: hsl(315, 20%, 92%);
+  --primary: hsl(270, 70%, 60%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(340, 20%, 96%);
-  --secondary-foreground: hsl(340, 15%, 15%);
-  --accent: hsl(330, 45%, 90%);
-  --accent-foreground: hsl(340, 82%, 52%);
+  --secondary: hsl(315, 25%, 95%);
+  --secondary-foreground: hsl(270, 15%, 15%);
+  --accent: hsl(300, 40%, 90%);
+  --accent-foreground: hsl(270, 70%, 60%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: hsl(340, 82%, 52%);
+  --ring: hsl(270, 70%, 60%);
   --radius: 1rem;
   
   /* Custom educational colors - Feminine */
-  --chart-1: hsl(340, 82%, 52%);
-  --chart-2: hsl(320, 70%, 60%);
-  --chart-3: hsl(300, 65%, 65%);
-  --chart-4: hsl(280, 60%, 70%);
-  --chart-5: hsl(260, 55%, 75%);
+  --chart-1: hsl(270, 70%, 60%);
+  --chart-2: hsl(300, 65%, 65%);
+  --chart-3: hsl(330, 60%, 70%);
+  --chart-4: hsl(350, 55%, 75%);
+  --chart-5: hsl(20, 50%, 80%);
   
   /* Gradient variables */
-  --gradient-primary: linear-gradient(135deg, #ec4899 0%, #f97316 50%, #fbbf24 100%);
-  --gradient-secondary: linear-gradient(135deg, #f3e8ff 0%, #fce7f3 50%, #fef3c7 100%);
-  --gradient-card: linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(249, 115, 22, 0.05) 100%);
-  --shadow-primary: 0 4px 20px rgba(236, 72, 153, 0.15);
-  --shadow-secondary: 0 2px 10px rgba(236, 72, 153, 0.1);
+  --gradient-primary: linear-gradient(135deg, #8b5fbf 0%, #a569bd 100%);
+  --gradient-secondary: linear-gradient(135deg, #f4f1ff 0%, #ede7f6 100%);
+  --gradient-card: linear-gradient(135deg, rgba(139, 95, 191, 0.05) 0%, rgba(165, 105, 189, 0.05) 100%);
+  --shadow-primary: 0 4px 20px rgba(139, 95, 191, 0.15);
+  --shadow-secondary: 0 2px 10px rgba(139, 95, 191, 0.1);
+  
+  /* Dynamic theme variables */
+  --theme-primary: #8b5fbf;
+  --theme-secondary: #d1c4e9;
+  --theme-gradient: linear-gradient(135deg, #8b5fbf 0%, #a569bd 100%);
 }
 
 .theme-masculine {
-  /* Masculine Theme */
-  --background: hsl(220, 100%, 99%);
-  --foreground: hsl(220, 20%, 15%);
-  --muted: hsl(220, 25%, 96%);
-  --muted-foreground: hsl(220, 15%, 46%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(220, 20%, 15%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(220, 20%, 15%);
-  --border: hsl(220, 25%, 92%);
-  --input: hsl(220, 25%, 92%);
-  --primary: hsl(220, 90%, 56%);
+  /* Masculine Theme - Soft Blue */
+  --background: hsl(210, 40%, 98%);
+  --foreground: hsl(220, 15%, 15%);
+  --muted: hsl(210, 25%, 95%);
+  --muted-foreground: hsl(220, 10%, 45%);
+  --popover: hsl(210, 50%, 99%);
+  --popover-foreground: hsl(220, 15%, 15%);
+  --card: hsl(210, 50%, 99%);
+  --card-foreground: hsl(220, 15%, 15%);
+  --border: hsl(210, 20%, 90%);
+  --input: hsl(210, 20%, 92%);
+  --primary: hsl(210, 70%, 60%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(220, 25%, 96%);
-  --secondary-foreground: hsl(220, 20%, 15%);
-  --accent: hsl(200, 45%, 90%);
-  --accent-foreground: hsl(220, 90%, 56%);
+  --secondary: hsl(210, 25%, 95%);
+  --secondary-foreground: hsl(220, 15%, 15%);
+  --accent: hsl(200, 40%, 90%);
+  --accent-foreground: hsl(210, 70%, 60%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: hsl(220, 90%, 56%);
+  --ring: hsl(210, 70%, 60%);
   --radius: 0.75rem;
   
   /* Custom educational colors - Masculine */
-  --chart-1: hsl(220, 90%, 56%);
-  --chart-2: hsl(200, 85%, 60%);
-  --chart-3: hsl(180, 80%, 65%);
-  --chart-4: hsl(160, 75%, 70%);
-  --chart-5: hsl(140, 70%, 75%);
+  --chart-1: hsl(210, 70%, 60%);
+  --chart-2: hsl(190, 65%, 65%);
+  --chart-3: hsl(170, 60%, 70%);
+  --chart-4: hsl(150, 55%, 75%);
+  --chart-5: hsl(130, 50%, 80%);
   
   /* Gradient variables */
-  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #10b981 100%);
-  --gradient-secondary: linear-gradient(135deg, #dbeafe 0%, #cffafe 50%, #d1fae5 100%);
-  --gradient-card: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%);
-  --shadow-primary: 0 4px 20px rgba(59, 130, 246, 0.15);
-  --shadow-secondary: 0 2px 10px rgba(59, 130, 246, 0.1);
+  --gradient-primary: linear-gradient(135deg, #5b9bd5 0%, #7bb3e0 100%);
+  --gradient-secondary: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  --gradient-card: linear-gradient(135deg, rgba(91, 155, 213, 0.05) 0%, rgba(123, 179, 224, 0.05) 100%);
+  --shadow-primary: 0 4px 20px rgba(91, 155, 213, 0.15);
+  --shadow-secondary: 0 2px 10px rgba(91, 155, 213, 0.1);
+  
+  /* Dynamic theme variables */
+  --theme-primary: #5b9bd5;
+  --theme-secondary: #b3d9f2;
+  --theme-gradient: linear-gradient(135deg, #5b9bd5 0%, #7bb3e0 100%);
+}
+
+.theme-neutral {
+  /* Neutral Theme - Soft Green */
+  --background: hsl(120, 30%, 98%);
+  --foreground: hsl(140, 15%, 15%);
+  --muted: hsl(120, 20%, 95%);
+  --muted-foreground: hsl(140, 10%, 45%);
+  --popover: hsl(120, 40%, 99%);
+  --popover-foreground: hsl(140, 15%, 15%);
+  --card: hsl(120, 40%, 99%);
+  --card-foreground: hsl(140, 15%, 15%);
+  --border: hsl(120, 15%, 90%);
+  --input: hsl(120, 15%, 92%);
+  --primary: hsl(140, 60%, 50%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(120, 20%, 95%);
+  --secondary-foreground: hsl(140, 15%, 15%);
+  --accent: hsl(130, 30%, 90%);
+  --accent-foreground: hsl(140, 60%, 50%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --ring: hsl(140, 60%, 50%);
+  --radius: 0.75rem;
+  
+  /* Custom educational colors - Neutral */
+  --chart-1: hsl(140, 60%, 50%);
+  --chart-2: hsl(160, 55%, 55%);
+  --chart-3: hsl(180, 50%, 60%);
+  --chart-4: hsl(200, 45%, 65%);
+  --chart-5: hsl(220, 40%, 70%);
+  
+  /* Gradient variables */
+  --gradient-primary: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  --gradient-secondary: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  --gradient-card: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(102, 187, 106, 0.05) 100%);
+  --shadow-primary: 0 4px 20px rgba(76, 175, 80, 0.15);
+  --shadow-secondary: 0 2px 10px rgba(76, 175, 80, 0.1);
+  
+  /* Dynamic theme variables */
+  --theme-primary: #4caf50;
+  --theme-secondary: #c8e6c9;
+  --theme-gradient: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
 }
 
 .dark {
@@ -127,21 +180,77 @@
   --ring: hsl(220, 90%, 66%);
 }
 
-/* Typography classes */
+/* Typography classes with theme-aware readability */
 .font-vazir {
   font-family: 'Vazir', 'Tahoma', 'Arial', sans-serif;
+  font-weight: var(--font-weight-normal, 400);
+  line-height: 1.6;
 }
 
 .font-sahel {
   font-family: 'Sahel', 'Vazir', 'Tahoma', sans-serif;
+  font-weight: var(--font-weight-normal, 400);
 }
 
 .font-shabnam {
   font-family: 'Shabnam', 'Vazir', 'Tahoma', sans-serif;
+  font-weight: var(--font-weight-medium, 500);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
 }
 
 .font-dana {
   font-family: 'Dana', 'Vazir', 'Tahoma', sans-serif;
+  font-weight: var(--font-weight-normal, 400);
+}
+
+/* Theme-specific font adjustments for better readability */
+.theme-masculine .font-vazir {
+  font-weight: 475;
+  letter-spacing: -0.005em;
+}
+
+.theme-masculine .font-shabnam {
+  font-weight: 550;
+  letter-spacing: 0.005em;
+}
+
+.theme-masculine .font-dana {
+  font-weight: 450;
+}
+
+.theme-neutral .font-vazir {
+  font-weight: 450;
+  letter-spacing: -0.003em;
+}
+
+.theme-neutral .font-shabnam {
+  font-weight: 525;
+  letter-spacing: 0.003em;
+}
+
+.theme-neutral .font-dana {
+  font-weight: 425;
+}
+
+/* Enhanced body typography for all themes */
+body {
+  font-family: 'Vazir', 'Tahoma', 'Arial', sans-serif;
+  line-height: 1.65;
+  direction: rtl;
+  font-weight: var(--font-weight-normal, 400);
+}
+
+.theme-masculine body {
+  font-weight: 450;
+  letter-spacing: -0.01em;
+  line-height: 1.6;
+}
+
+.theme-neutral body {
+  font-weight: 425;
+  letter-spacing: -0.005em;
+  line-height: 1.62;
 }
 
 /* Modern gradient classes */
