@@ -36,7 +36,7 @@ export const users = pgTable("users", {
   lastName: varchar("last_name").notNull(),
   email: varchar("email"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").notNull().default("student"), // student, teacher, counselor, educational_deputy, liaison_office, parent
+  role: varchar("role").notNull().default("student"), // student, teacher, counselor, educational_deputy, liaison_office, parent, principal, vice_principal
   schoolId: varchar("school_id"),
   parentId: varchar("parent_id"), // for students to link to parent
   isVerified: boolean("is_verified").default(false), // تایید شماره تلفن
@@ -213,6 +213,107 @@ export const aiAnalytics = pgTable("ai_analytics", {
   generatedAt: timestamp("generated_at").defaultNow(),
 });
 
+// Disciplinary Records
+export const disciplinaryRecords = pgTable("disciplinary_records", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").references(() => users.id).notNull(),
+  teacherId: varchar("teacher_id").references(() => users.id),
+  schoolId: varchar("school_id").references(() => schools.id),
+  classId: varchar("class_id").references(() => classes.id),
+  incidentType: varchar("incident_type", { length: 100 }).notNull(), // tardiness, absence, disruption, etc.
+  severity: varchar("severity", { length: 20 }).notNull(), // minor, moderate, major, severe
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description").notNull(),
+  actionTaken: text("action_taken"),
+  parentNotified: boolean("parent_notified").default(false),
+  resolved: boolean("resolved").default(false),
+  incidentDate: timestamp("incident_date").notNull(),
+  reportDate: timestamp("report_date").defaultNow(),
+  followUpDate: timestamp("follow_up_date"),
+  notes: text("notes"),
+  status: varchar("status", { length: 20 }).default("active"), // active, resolved, dismissed
+  priority: varchar("priority", { length: 20 }).default("normal"), // low, normal, high, urgent
+});
+
+// Score System - امتیازات و نمره‌گذاری انضباط
+export const scoreSystem = pgTable("score_system", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").references(() => users.id).notNull(),
+  schoolId: varchar("school_id").references(() => schools.id).notNull(),
+  semester: varchar("semester", { length: 20 }).notNull(), // first, second
+  academicYear: varchar("academic_year", { length: 10 }).notNull(), // 1402-1403
+  disciplinaryScore: decimal("disciplinary_score", { precision: 5, scale: 2 }).default('20.00'), // نمره انضباط از 20
+  behaviorScore: decimal("behavior_score", { precision: 5, scale: 2 }).default('20.00'), // نمره رفتار از 20
+  totalViolations: integer("total_violations").default(0),
+  totalAchievements: integer("total_achievements").default(0),
+  warningCount: integer("warning_count").default(0),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Achievement System - کارت امتیاز مثبت
+export const achievements = pgTable("achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").references(() => users.id).notNull(),
+  teacherId: varchar("teacher_id").references(() => users.id),
+  schoolId: varchar("school_id").references(() => schools.id),
+  achievementType: varchar("achievement_type", { length: 100 }).notNull(), // academic_excellence, good_behavior, participation, etc.
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description").notNull(),
+  points: decimal("points", { precision: 4, scale: 2 }).notNull(), // امتیاز اضافه شده
+  category: varchar("category", { length: 50 }).notNull(), // academic, social, sport, art, etc.
+  awardDate: timestamp("award_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Student-Teacher Assignment - تخصیص دانش‌آموز به معلم
+export const studentTeacherAssignments = pgTable("student_teacher_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").references(() => users.id).notNull(),
+  teacherId: varchar("teacher_id").references(() => users.id).notNull(),
+  schoolId: varchar("school_id").references(() => schools.id).notNull(),
+  classId: varchar("class_id").references(() => classes.id),
+  subject: varchar("subject", { length: 100 }),
+  assignedBy: varchar("assigned_by").references(() => users.id).notNull(), // principal or vice_principal
+  isActive: boolean("is_active").default(true),
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Report Cards - کارنامه‌ها
+export const reportCards = pgTable("report_cards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").references(() => users.id).notNull(),
+  schoolId: varchar("school_id").references(() => schools.id).notNull(),
+  semester: varchar("semester", { length: 20 }).notNull(),
+  academicYear: varchar("academic_year", { length: 10 }).notNull(),
+  disciplinaryGrade: decimal("disciplinary_grade", { precision: 5, scale: 2 }),
+  behaviorGrade: decimal("behavior_grade", { precision: 5, scale: 2 }),
+  overallGrade: decimal("overall_grade", { precision: 5, scale: 2 }),
+  teacherComments: text("teacher_comments"),
+  principalComments: text("principal_comments"),
+  parentNotified: boolean("parent_notified").default(false),
+  issuedAt: timestamp("issued_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Tuition Warnings - هشدار شهریه
+export const tuitionWarnings = pgTable("tuition_warnings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").references(() => users.id).notNull(),
+  parentId: varchar("parent_id").references(() => users.id),
+  schoolId: varchar("school_id").references(() => schools.id).notNull(),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  warningType: varchar("warning_type", { length: 50 }).notNull(), // overdue, upcoming, final
+  status: varchar("status", { length: 20 }).default("pending"), // pending, paid, overdue
+  sentAt: timestamp("sent_at").defaultNow(),
+  paidAt: timestamp("paid_at"),
+  notes: text("notes"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   school: one(schools, {
@@ -231,6 +332,13 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   counselingSessions: many(counselingSessions),
   questionBank: many(questionBank),
   studyMaterials: many(studyMaterials),
+  disciplinaryRecords: many(disciplinaryRecords),
+  scoreSystem: many(scoreSystem),
+  achievements: many(achievements),
+  studentAssignments: many(studentTeacherAssignments),
+  teacherAssignments: many(studentTeacherAssignments),
+  reportCards: many(reportCards),
+  tuitionWarnings: many(tuitionWarnings),
 }));
 
 export const schoolsRelations = relations(schools, ({ many }) => ({
@@ -251,6 +359,12 @@ export const classesRelations = relations(classes, ({ one, many }) => ({
   attendance: many(attendance),
   onlineClassrooms: many(onlineClassrooms),
   examinations: many(examinations),
+  disciplinaryRecords: many(disciplinaryRecords),
+  scoreSystem: many(scoreSystem),
+  achievements: many(achievements),
+  studentTeacherAssignments: many(studentTeacherAssignments),
+  reportCards: many(reportCards),
+  tuitionWarnings: many(tuitionWarnings),
 }));
 
 export const assignmentsRelations = relations(assignments, ({ one, many }) => ({
@@ -354,6 +468,101 @@ export const counselingSessionsRelations = relations(counselingSessions, ({ one 
   }),
 }));
 
+export const disciplinaryRecordsRelations = relations(disciplinaryRecords, ({ one }) => ({
+  student: one(users, {
+    fields: [disciplinaryRecords.studentId],
+    references: [users.id],
+  }),
+  teacher: one(users, {
+    fields: [disciplinaryRecords.teacherId],
+    references: [users.id],
+  }),
+  school: one(schools, {
+    fields: [disciplinaryRecords.schoolId],
+    references: [schools.id],
+  }),
+  class: one(classes, {
+    fields: [disciplinaryRecords.classId],
+    references: [classes.id],
+  }),
+}));
+
+// New relations for extended tables
+export const scoreSystemRelations = relations(scoreSystem, ({ one }) => ({
+  student: one(users, {
+    fields: [scoreSystem.studentId],
+    references: [users.id],
+  }),
+  school: one(schools, {
+    fields: [scoreSystem.schoolId],
+    references: [schools.id],
+  }),
+}));
+
+export const achievementsRelations = relations(achievements, ({ one }) => ({
+  student: one(users, {
+    fields: [achievements.studentId],
+    references: [users.id],
+  }),
+  teacher: one(users, {
+    fields: [achievements.teacherId],
+    references: [users.id],
+  }),
+  school: one(schools, {
+    fields: [achievements.schoolId],
+    references: [schools.id],
+  }),
+}));
+
+export const studentTeacherAssignmentsRelations = relations(studentTeacherAssignments, ({ one }) => ({
+  student: one(users, {
+    fields: [studentTeacherAssignments.studentId],
+    references: [users.id],
+  }),
+  teacher: one(users, {
+    fields: [studentTeacherAssignments.teacherId],
+    references: [users.id],
+  }),
+  school: one(schools, {
+    fields: [studentTeacherAssignments.schoolId],
+    references: [schools.id],
+  }),
+  class: one(classes, {
+    fields: [studentTeacherAssignments.classId],
+    references: [classes.id],
+  }),
+  assignedBy: one(users, {
+    fields: [studentTeacherAssignments.assignedBy],
+    references: [users.id],
+  }),
+}));
+
+export const reportCardsRelations = relations(reportCards, ({ one }) => ({
+  student: one(users, {
+    fields: [reportCards.studentId],
+    references: [users.id],
+  }),
+  school: one(schools, {
+    fields: [reportCards.schoolId],
+    references: [schools.id],
+  }),
+}));
+
+export const tuitionWarningsRelations = relations(tuitionWarnings, ({ one }) => ({
+  student: one(users, {
+    fields: [tuitionWarnings.studentId],
+    references: [users.id],
+  }),
+  parent: one(users, {
+    fields: [tuitionWarnings.parentId],
+    references: [users.id],
+  }),
+  school: one(schools, {
+    fields: [tuitionWarnings.schoolId],
+    references: [schools.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -435,6 +644,38 @@ export const insertAiAnalyticsSchema = createInsertSchema(aiAnalytics).omit({
   generatedAt: true,
 });
 
+export const insertDisciplinaryRecordSchema = createInsertSchema(disciplinaryRecords).omit({
+  id: true,
+  reportDate: true,
+});
+
+export const insertScoreSystemSchema = createInsertSchema(scoreSystem).omit({
+  id: true,
+  createdAt: true,
+  lastUpdated: true,
+});
+
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStudentTeacherAssignmentSchema = createInsertSchema(studentTeacherAssignments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertReportCardSchema = createInsertSchema(reportCards).omit({
+  id: true,
+  createdAt: true,
+  issuedAt: true,
+});
+
+export const insertTuitionWarningSchema = createInsertSchema(tuitionWarnings).omit({
+  id: true,
+  sentAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -463,7 +704,7 @@ export const completeProfileSchema = z.object({
   firstName: z.string().min(1, "نام الزامی است"),
   lastName: z.string().min(1, "نام خانوادگی الزامی است"),
   email: z.string().email("ایمیل معتبر وارد کنید").optional(),
-  role: z.enum(["student", "teacher", "counselor", "educational_deputy", "liaison_office", "parent"]),
+  role: z.enum(["student", "teacher", "counselor", "educational_deputy", "liaison_office", "parent", "principal", "vice_principal"]),
   schoolId: z.string().optional(),
 });
 
@@ -498,3 +739,15 @@ export type CounselingSession = typeof counselingSessions.$inferSelect;
 export type InsertCounselingSession = z.infer<typeof insertCounselingSessionSchema>;
 export type AiAnalytics = typeof aiAnalytics.$inferSelect;
 export type InsertAiAnalytics = z.infer<typeof insertAiAnalyticsSchema>;
+export type DisciplinaryRecord = typeof disciplinaryRecords.$inferSelect;
+export type InsertDisciplinaryRecord = z.infer<typeof insertDisciplinaryRecordSchema>;
+export type ScoreSystem = typeof scoreSystem.$inferSelect;
+export type InsertScoreSystem = z.infer<typeof insertScoreSystemSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type StudentTeacherAssignment = typeof studentTeacherAssignments.$inferSelect;
+export type InsertStudentTeacherAssignment = z.infer<typeof insertStudentTeacherAssignmentSchema>;
+export type ReportCard = typeof reportCards.$inferSelect;
+export type InsertReportCard = z.infer<typeof insertReportCardSchema>;
+export type TuitionWarning = typeof tuitionWarnings.$inferSelect;
+export type InsertTuitionWarning = z.infer<typeof insertTuitionWarningSchema>;

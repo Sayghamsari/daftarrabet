@@ -33,7 +33,7 @@ export default function SMSDashboard() {
   }
 
   return (
-    <div className="min-h-screen gradient-secondary">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="flex">
         <Sidebar />

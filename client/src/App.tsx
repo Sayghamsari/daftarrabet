@@ -25,6 +25,13 @@ import Examinations from "@/pages/examinations";
 import SMSDashboard from "@/pages/sms-dashboard";
 import GradeDashboard from "@/pages/grade-dashboard";
 import ExamBuilderDashboard from "@/pages/exam-builder-dashboard";
+import DisciplinaryDashboard from "@/pages/disciplinary-dashboard";
+import StudentTeacherAssignments from "@/pages/student-teacher-assignments";
+import AchievementsDashboard from "@/pages/achievements-dashboard";
+import TuitionWarnings from "@/pages/tuition-warnings";
+import ReportCards from "@/pages/report-cards";
+import Notifications from "@/pages/notifications";
+import DailySchedule from "@/pages/daily-schedule";
 import LoadingSpinner from "@/components/common/loading-spinner";
 
 function Router() {
@@ -64,6 +71,13 @@ function Router() {
           <Route path="/sms-dashboard" component={SMSDashboard} />
           <Route path="/grade-dashboard" component={GradeDashboard} />
           <Route path="/exam-builder-dashboard" component={ExamBuilderDashboard} />
+          <Route path="/disciplinary-dashboard" component={DisciplinaryDashboard} />
+          <Route path="/student-teacher-assignments" component={StudentTeacherAssignments} />
+          <Route path="/achievements-dashboard" component={AchievementsDashboard} />
+          <Route path="/tuition-warnings" component={TuitionWarnings} />
+          <Route path="/report-cards" component={ReportCards} />
+          <Route path="/notifications" component={Notifications} />
+          <Route path="/daily-schedule" component={DailySchedule} />
         </>
       )}
       <Route component={NotFound} />
@@ -77,7 +91,7 @@ function App() {
       <ThemeProvider>
         <TooltipProvider>
           <AuthProvider>
-            <div className="font-vazir min-h-screen bg-background text-foreground transition-all duration-300" dir="rtl">
+            <div className="font-shabnam min-h-screen bg-white text-foreground transition-all duration-300" dir="rtl">
               <Toaster />
               <Router />
             </div>

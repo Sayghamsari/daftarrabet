@@ -22,7 +22,12 @@ import {
   School,
   Smartphone,
   TrendingUp,
-  PlusCircle
+  PlusCircle,
+  Shield,
+  Award,
+  UserPlus,
+  CreditCard,
+  AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,11 +43,13 @@ export default function Sidebar() {
     const roleMenus = {
       student: [
         ...commonItems,
+        { label: "برنامه روزانه", href: "/daily-schedule", icon: Calendar },
         { label: "تکالیف", href: "/assignments", icon: BookOpen },
         { label: "حضور و غیاب", href: "/attendance", icon: Calendar },
         { label: "کلاس آنلاین", href: "/online-classroom", icon: Video },
         { label: "آزمون‌ها", href: "/examinations", icon: GraduationCap },
         { label: "عملکرد", href: "/dashboard/student", icon: BarChart3 },
+        { label: "اعلانات", href: "/notifications", icon: Bell },
       ],
       teacher: [
         ...commonItems,
@@ -92,6 +99,23 @@ export default function Sidebar() {
         { label: "مدیریت مدرسه", href: "/dashboard/principal", icon: School },
         { label: "معلمان", href: "/dashboard/principal", icon: Users },
         { label: "گزارش‌های کلی", href: "/dashboard/principal", icon: FileText },
+        { label: "تخصیص دانش‌آموزان", href: "/student-teacher-assignments", icon: UserPlus },
+        { label: "امور انضباطی", href: "/disciplinary-dashboard", icon: Shield },
+        { label: "کارت امتیاز", href: "/achievements-dashboard", icon: Award },
+        { label: "کارنامه انضباط", href: "/report-cards", icon: FileText },
+        { label: "اعلانات", href: "/notifications", icon: Bell },
+      ],
+      vice_principal: [
+        ...commonItems,
+        { label: "داشبورد معاونت", href: "/dashboard/vice-principal", icon: BarChart3 },
+        { label: "نظارت بر کلاس‌ها", href: "/dashboard/vice-principal", icon: Users },
+        { label: "گزارش‌گیری", href: "/dashboard/vice-principal", icon: FileText },
+        { label: "تخصیص دانش‌آموزان", href: "/student-teacher-assignments", icon: UserPlus },
+        { label: "امور انضباطی", href: "/disciplinary-dashboard", icon: Shield },
+        { label: "کارت امتیاز", href: "/achievements-dashboard", icon: Award },
+        { label: "هشدار شهریه", href: "/tuition-warnings", icon: CreditCard },
+        { label: "کارنامه انضباط", href: "/report-cards", icon: FileText },
+        { label: "اعلانات", href: "/notifications", icon: Bell },
       ]
     };
 

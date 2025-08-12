@@ -8,20 +8,20 @@
 @tailwind utilities;
 
 :root {
-  /* Default (Feminine) Theme - Soft Purple */
-  --background: hsl(315, 40%, 98%);
+  /* Default (Feminine) Theme - Always White Background */
+  --background: hsl(0, 0%, 100%);
   --foreground: hsl(270, 15%, 15%);
-  --muted: hsl(315, 25%, 95%);
+  --muted: hsl(0, 0%, 98%);
   --muted-foreground: hsl(270, 10%, 45%);
-  --popover: hsl(315, 50%, 99%);
+  --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(270, 15%, 15%);
-  --card: hsl(315, 50%, 99%);
+  --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(270, 15%, 15%);
   --border: hsl(315, 20%, 90%);
-  --input: hsl(315, 20%, 92%);
+  --input: hsl(0, 0%, 96%);
   --primary: hsl(270, 70%, 60%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(315, 25%, 95%);
+  --secondary: hsl(0, 0%, 98%);
   --secondary-foreground: hsl(270, 15%, 15%);
   --accent: hsl(300, 40%, 90%);
   --accent-foreground: hsl(270, 70%, 60%);
@@ -51,20 +51,20 @@
 }
 
 .theme-masculine {
-  /* Masculine Theme - Soft Blue */
-  --background: hsl(210, 40%, 98%);
+  /* Masculine Theme - Always White Background */
+  --background: hsl(0, 0%, 100%);
   --foreground: hsl(220, 15%, 15%);
-  --muted: hsl(210, 25%, 95%);
+  --muted: hsl(0, 0%, 98%);
   --muted-foreground: hsl(220, 10%, 45%);
-  --popover: hsl(210, 50%, 99%);
+  --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(220, 15%, 15%);
-  --card: hsl(210, 50%, 99%);
+  --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(220, 15%, 15%);
   --border: hsl(210, 20%, 90%);
-  --input: hsl(210, 20%, 92%);
+  --input: hsl(0, 0%, 96%);
   --primary: hsl(210, 70%, 60%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(210, 25%, 95%);
+  --secondary: hsl(0, 0%, 98%);
   --secondary-foreground: hsl(220, 15%, 15%);
   --accent: hsl(200, 40%, 90%);
   --accent-foreground: hsl(210, 70%, 60%);
@@ -94,20 +94,20 @@
 }
 
 .theme-neutral {
-  /* Neutral Theme - Soft Green */
-  --background: hsl(120, 30%, 98%);
+  /* Neutral Theme - Always White Background */
+  --background: hsl(0, 0%, 100%);
   --foreground: hsl(140, 15%, 15%);
-  --muted: hsl(120, 20%, 95%);
+  --muted: hsl(0, 0%, 98%);
   --muted-foreground: hsl(140, 10%, 45%);
-  --popover: hsl(120, 40%, 99%);
+  --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(140, 15%, 15%);
-  --card: hsl(120, 40%, 99%);
+  --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(140, 15%, 15%);
   --border: hsl(120, 15%, 90%);
-  --input: hsl(120, 15%, 92%);
+  --input: hsl(0, 0%, 96%);
   --primary: hsl(140, 60%, 50%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(120, 20%, 95%);
+  --secondary: hsl(0, 0%, 98%);
   --secondary-foreground: hsl(140, 15%, 15%);
   --accent: hsl(130, 30%, 90%);
   --accent-foreground: hsl(140, 60%, 50%);
@@ -180,28 +180,31 @@
   --ring: hsl(220, 90%, 66%);
 }
 
-/* Typography classes with theme-aware readability */
+/* Typography classes - Shabnam as primary beautiful font */
 .font-vazir {
-  font-family: 'Vazir', 'Tahoma', 'Arial', sans-serif;
-  font-weight: var(--font-weight-normal, 400);
-  line-height: 1.6;
+  font-family: 'Shabnam', 'Vazir', 'Tahoma', 'Arial', sans-serif;
+  font-weight: var(--font-weight-medium, 500);
+  line-height: 1.65;
+  letter-spacing: 0.01em;
 }
 
 .font-sahel {
-  font-family: 'Sahel', 'Vazir', 'Tahoma', sans-serif;
-  font-weight: var(--font-weight-normal, 400);
+  font-family: 'Shabnam', 'Sahel', 'Vazir', 'Tahoma', sans-serif;
+  font-weight: var(--font-weight-medium, 500);
+  letter-spacing: 0.005em;
 }
 
 .font-shabnam {
   font-family: 'Shabnam', 'Vazir', 'Tahoma', sans-serif;
   font-weight: var(--font-weight-medium, 500);
-  line-height: 1.5;
+  line-height: 1.6;
   letter-spacing: 0.01em;
 }
 
 .font-dana {
-  font-family: 'Dana', 'Vazir', 'Tahoma', sans-serif;
-  font-weight: var(--font-weight-normal, 400);
+  font-family: 'Shabnam', 'Dana', 'Vazir', 'Tahoma', sans-serif;
+  font-weight: var(--font-weight-medium, 500);
+  letter-spacing: 0.005em;
 }
 
 /* Theme-specific font adjustments for better readability */
@@ -233,23 +236,25 @@
   font-weight: 425;
 }
 
-/* Enhanced body typography for all themes */
+/* Enhanced body typography - Beautiful Shabnam font everywhere */
 body {
-  font-family: 'Vazir', 'Tahoma', 'Arial', sans-serif;
+  font-family: 'Shabnam', 'Vazir', 'Tahoma', 'Arial', sans-serif;
   line-height: 1.65;
   direction: rtl;
-  font-weight: var(--font-weight-normal, 400);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  background-color: white !important;
 }
 
 .theme-masculine body {
-  font-weight: 450;
-  letter-spacing: -0.01em;
+  font-weight: 525;
+  letter-spacing: 0.005em;
   line-height: 1.6;
 }
 
 .theme-neutral body {
-  font-weight: 425;
-  letter-spacing: -0.005em;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   line-height: 1.62;
 }
 

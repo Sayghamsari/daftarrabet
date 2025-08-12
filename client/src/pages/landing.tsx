@@ -26,7 +26,7 @@ import {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen gradient-secondary">
+    <div className="min-h-screen bg-white">
       {/* Navigation Header */}
       <header className="glass backdrop-blur-md border-b border-primary/20 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
