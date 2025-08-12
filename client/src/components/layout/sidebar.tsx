@@ -27,7 +27,8 @@ import {
   Award,
   UserPlus,
   CreditCard,
-  AlertTriangle
+  AlertTriangle,
+  Bell
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
