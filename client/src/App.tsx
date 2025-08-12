@@ -32,6 +32,11 @@ import TuitionWarnings from "@/pages/tuition-warnings";
 import ReportCards from "@/pages/report-cards";
 import Notifications from "@/pages/notifications";
 import DailySchedule from "@/pages/daily-schedule";
+import AbsenceJustification from "@/pages/absence-justification";
+import TeacherMessaging from "@/pages/teacher-messaging";
+import WeeklySchedule from "@/pages/weekly-schedule";
+import EducationalGoals from "@/pages/educational-goals";
+import ExamSchedule from "@/pages/exam-schedule";
 import LoadingSpinner from "@/components/common/loading-spinner";
 
 function Router() {
@@ -78,6 +83,11 @@ function Router() {
           <Route path="/report-cards" component={ReportCards} />
           <Route path="/notifications" component={Notifications} />
           <Route path="/daily-schedule" component={DailySchedule} />
+          <Route path="/absence-justification" component={AbsenceJustification} />
+          <Route path="/teacher-messaging" component={TeacherMessaging} />
+          <Route path="/weekly-schedule" component={WeeklySchedule} />
+          <Route path="/educational-goals" component={EducationalGoals} />
+          <Route path="/exam-schedule" component={ExamSchedule} />
         </>
       )}
       <Route component={NotFound} />

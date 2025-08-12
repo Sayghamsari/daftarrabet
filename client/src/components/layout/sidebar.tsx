@@ -28,7 +28,9 @@ import {
   UserPlus,
   CreditCard,
   AlertTriangle,
-  Bell
+  Bell,
+  LogOut,
+  User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,41 +47,59 @@ export default function Sidebar() {
       student: [
         ...commonItems,
         { label: "برنامه روزانه", href: "/daily-schedule", icon: Calendar },
+        { label: "برنامه هفتگی", href: "/weekly-schedule", icon: Calendar },
         { label: "تکالیف", href: "/assignments", icon: BookOpen },
         { label: "حضور و غیاب", href: "/attendance", icon: Calendar },
+        { label: "توجیه غیبت", href: "/absence-justification", icon: FileText },
         { label: "کلاس آنلاین", href: "/online-classroom", icon: Video },
         { label: "آزمون‌ها", href: "/examinations", icon: GraduationCap },
+        { label: "برنامه امتحانات", href: "/exam-schedule", icon: GraduationCap },
+        { label: "پیام به معلمان", href: "/teacher-messaging", icon: MessageSquare },
+        { label: "اهداف تحصیلی", href: "/educational-goals", icon: TrendingUp },
         { label: "عملکرد", href: "/dashboard/student", icon: BarChart3 },
         { label: "اعلانات", href: "/notifications", icon: Bell },
       ],
       teacher: [
         ...commonItems,
-        { label: "داشبورد", href: "/dashboard/teacher", icon: BarChart3 },
-        { label: "کلاس‌ها", href: "/dashboard/teacher", icon: Users },
-        { label: "تکالیف", href: "/assignments", icon: BookOpen },
+        { label: "داشبورد معلم", href: "/dashboard/teacher", icon: BarChart3 },
+        { label: "کلاس‌های من", href: "/dashboard/teacher", icon: Users },
+        { label: "برنامه هفتگی", href: "/weekly-schedule", icon: Calendar },
+        { label: "برنامه امتحانات", href: "/exam-schedule", icon: GraduationCap },
+        { label: "تکالیف و نمرات", href: "/assignments", icon: BookOpen },
         { label: "حضور و غیاب", href: "/attendance", icon: UserCheck },
-        { label: "بانک سؤال", href: "/question-bank", icon: GraduationCap },
+        { label: "بانک سؤال", href: "/question-bank", icon: Brain },
         { label: "آزمون‌ها", href: "/examinations", icon: ClipboardList },
         { label: "کلاس آنلاین", href: "/online-classroom", icon: Video },
         { label: "مدیریت نمرات", href: "/grade-dashboard", icon: TrendingUp },
+        { label: "پیام‌ها", href: "/teacher-messaging", icon: MessageSquare },
         { label: "سازنده آزمون", href: "/exam-builder-dashboard", icon: PlusCircle },
         { label: "پیام‌رسانی SMS", href: "/sms-dashboard", icon: Smartphone },
+        { label: "اعلانات", href: "/notifications", icon: Bell },
       ],
       counselor: [
         ...commonItems,
-        { label: "داشبورد", href: "/dashboard/counselor", icon: BarChart3 },
+        { label: "داشبورد مشاور", href: "/dashboard/counselor", icon: BarChart3 },
         { label: "جلسات مشاوره", href: "/dashboard/counselor", icon: MessageSquare },
+        { label: "دانش‌آموزان من", href: "/students", icon: Users },
         { label: "تحلیل عملکرد", href: "/dashboard/counselor", icon: Brain },
+        { label: "پیام‌ها", href: "/teacher-messaging", icon: MessageSquare },
+        { label: "حضور و غیاب", href: "/attendance", icon: Calendar },
+        { label: "گزارش‌گیری", href: "/report-cards", icon: FileText },
         { label: "پیام‌رسانی SMS", href: "/sms-dashboard", icon: Smartphone },
+        { label: "اعلانات", href: "/notifications", icon: Bell },
       ],
       educational_deputy: [
         ...commonItems,
-        { label: "داشبورد تحلیلی", href: "/dashboard/educational-deputy", icon: BarChart3 },
+        { label: "داشبورد معاون آموزش", href: "/dashboard/educational-deputy", icon: BarChart3 },
         { label: "نظارت بر کلاس‌ها", href: "/dashboard/educational-deputy", icon: Users },
-        { label: "گزارش‌گیری", href: "/dashboard/educational-deputy", icon: FileText },
+        { label: "معلمان", href: "/dashboard/teacher", icon: Users },
+        { label: "برنامه امتحانات", href: "/exam-schedule", icon: GraduationCap },
         { label: "مدیریت نمرات", href: "/grade-dashboard", icon: TrendingUp },
         { label: "سازنده آزمون", href: "/exam-builder-dashboard", icon: PlusCircle },
+        { label: "پیام‌ها", href: "/teacher-messaging", icon: MessageSquare },
+        { label: "گزارش‌گیری", href: "/report-cards", icon: FileText },
         { label: "پیام‌رسانی SMS", href: "/sms-dashboard", icon: Smartphone },
+        { label: "اعلانات", href: "/notifications", icon: Bell },
       ],
       liaison_office: [
         ...commonItems,
@@ -90,9 +110,15 @@ export default function Sidebar() {
       ],
       parent: [
         ...commonItems,
-        { label: "عملکرد فرزند", href: "/dashboard/parent", icon: BarChart3 },
+        { label: "داشبورد ولی", href: "/dashboard/parent", icon: BarChart3 },
+        { label: "عملکرد فرزند", href: "/dashboard/parent", icon: TrendingUp },
         { label: "حضور و غیاب", href: "/attendance", icon: Calendar },
-        { label: "تکالیف", href: "/assignments", icon: BookOpen },
+        { label: "تکالیف فرزند", href: "/assignments", icon: BookOpen },
+        { label: "برنامه امتحانات", href: "/exam-schedule", icon: GraduationCap },
+        { label: "پیام‌ها", href: "/teacher-messaging", icon: MessageSquare },
+        { label: "کارنامه", href: "/report-cards", icon: FileText },
+        { label: "پرداخت شهریه", href: "/tuition-warnings", icon: CreditCard },
+        { label: "اعلانات", href: "/notifications", icon: Bell },
       ],
       principal: [
         ...commonItems,
@@ -193,6 +219,19 @@ export default function Sidebar() {
                   <HelpCircle className="w-5 h-5" />
                 </div>
                 راهنما
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start gap-3 font-vazir hover:bg-red-50 text-red-600 hover:text-red-700"
+                onClick={() => {
+                  // Call logout API or redirect to login
+                  window.location.href = '/auth';
+                }}
+              >
+                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                  <LogOut className="w-5 h-5" />
+                </div>
+                خروج از سیستم
               </Button>
             </div>
           </div>
